@@ -22,42 +22,42 @@ webContent::webContent(QWidget *parent) :
 
   //================================EUR/CNY====================================================
   EurContent = new LoadContent(EUR_URL);
-  EurThread = new QThread;
-  EurContent->moveToThread(EurThread);
+  //EurThread = new QThread;
+  //EurContent->moveToThread(EurThread);
 
   // default display content
-  //QTimer::singleShot(1, EurContent, SLOT(loadWebContent()));
-  //QTimer::singleShot(1, this, SLOT(progressBarLoading()));
-  QObject::connect(EurThread, SIGNAL(started()), EurContent, SLOT(loadWebContent()));
-  QObject::connect(EurThread, SIGNAL(started()), this, SLOT(progressBarLoading()));
+  QTimer::singleShot(1, EurContent, SLOT(loadWebContent()));
+  QTimer::singleShot(1, this, SLOT(progressBarLoading()));
+  //QObject::connect(EurThread, SIGNAL(started()), EurContent, SLOT(loadWebContent()));
+  //QObject::connect(EurThread, SIGNAL(started()), this, SLOT(progressBarLoading()));
 
   QObject::connect(ui->euroButton, SIGNAL(clicked(bool)), EurContent, SLOT(loadWebContent()));
   QObject::connect(ui->euroButton, SIGNAL(clicked(bool)), this, SLOT(progressBarLoading()));
   QObject::connect(EurContent, SIGNAL(QNetworkReplyFinished(QNetworkReply*)),
                    this, SLOT(QNetworkReplyFinishedLoad(QNetworkReply*)));
-  EurThread->start();
+  //EurThread->start();
 
   //=================================UDS/CNY======================================================
   UsdContent = new LoadContent(USD_URL);
-  UsdThread = new QThread;
-  UsdContent->moveToThread(UsdThread);
+  //UsdThread = new QThread;
+  //UsdContent->moveToThread(UsdThread);
 
   QObject::connect(ui->usdButton, SIGNAL(clicked(bool)), UsdContent, SLOT(loadWebContent()));
   QObject::connect(ui->usdButton, SIGNAL(clicked(bool)), this, SLOT(progressBarLoading()));
   QObject::connect(UsdContent, SIGNAL(QNetworkReplyFinished(QNetworkReply*)),
                    this, SLOT(QNetworkReplyFinishedLoad(QNetworkReply*)));
-  UsdThread->start();
+  //UsdThread->start();
 
   //=================================CNY/TWD======================================================
   TwdContent = new LoadContent(TWD_URL);
-  TwdThread = new QThread;
-  TwdContent->moveToThread(TwdThread);
+  //TwdThread = new QThread;
+  //TwdContent->moveToThread(TwdThread);
 
   QObject::connect(ui->twdButton, SIGNAL(clicked(bool)), TwdContent, SLOT(loadWebContent()));
   QObject::connect(ui->twdButton, SIGNAL(clicked(bool)), this, SLOT(progressBarLoading()));
   QObject::connect(TwdContent, SIGNAL(QNetworkReplyFinished(QNetworkReply*)),
                    this, SLOT(QNetworkReplyFinishedLoad(QNetworkReply*)));
-  TwdThread->start();
+  //TwdThread->start();
 
   //=========================================================================================
   QObject::connect(this, SIGNAL(replyContentFinished(QWebElementCollection)),
@@ -68,9 +68,9 @@ webContent::webContent(QWidget *parent) :
 webContent::~webContent()
 {
   delete ui;
-  delete EurThread;
-  delete UsdThread;
-  delete TwdThread;
+  //delete EurThread;
+  //delete UsdThread;
+  //delete TwdThread;
   delete EurContent;
   delete UsdContent;
   delete TwdContent;
