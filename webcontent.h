@@ -31,9 +31,9 @@ signals:
 
 private:
   Ui::webContent *ui;
-  //QThread* EurThread;
-  //QThread* UsdThread;
-  //QThread* TwdThread;
+  QThread* EurThread;
+  QThread* UsdThread;
+  QThread* TwdThread;
   LoadContent* EurContent;
   LoadContent* UsdContent;
   LoadContent* TwdContent;

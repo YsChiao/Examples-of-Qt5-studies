@@ -14,6 +14,7 @@ LoadContent::~LoadContent()
 
 void LoadContent::loadWebContent()
 {
+  //qDebug() << "Thread : " << QThread::currentThreadId();
   manager = new QNetworkAccessManager();
   request = new QNetworkRequest();
   QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
