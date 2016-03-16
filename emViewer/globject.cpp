@@ -180,7 +180,7 @@ void glObject::resizeGL(int width, int height)
 
 void glObject::processing()
 {
-    // get size
+    // concatenation the binary data and get the size of volumn
     unsigned int x, y, z;
     for(int n = 4; n < 16; n += 4)
     {
