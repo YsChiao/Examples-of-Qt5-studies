@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/Icons8-Windows-8-Arrows-Left-Round.ico</file>
+        <file>images/Icons8-Windows-8-Arrows-Right-Round.ico</file>
+    </qresource>
+</RCC>
