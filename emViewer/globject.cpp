@@ -27,6 +27,7 @@ void glObject::open()
         else
         {
             fileData = file.readAll();
+            processing();
         }
     }
     else
@@ -175,6 +176,54 @@ void glObject::resizeGL(int width, int height)
     glMatrixMode(GL_MODELVIEW);
 
 }
+
+
+void glObject::processing()
+{
+    // get size
+    unsigned int x, y, z;
+    for(int n = 4; n < 16; n += 4)
+    {
+        unsigned char a = (unsigned char)fileData.at(n);
+        unsigned char b = (unsigned char)fileData.at(n+1);
+        unsigned char c = (unsigned char)fileData.at(n+2);
+        unsigned char d = (unsigned char)fileData.at(n+3);
+
+        if(n == 4)
+        {
+            x = a | (b<<8) | (c<<16) | (d<<24);
+        }
+        if(n == 8)
+        {
+            y = a | (b<<8) | (c<<16) | (d<<24);
+        }
+        if(n == 12)
+        {
+            z = a | (b<<8) | (c<<16) | (d<<24);
+        }
+    }
+//    qDebug() << qPrintable(QString::number(x,16));
+//    qDebug() << qPrintable(QString::number(y,16));
+//    qDebug() << qPrintable(QString::number(z,16));
+
+//    int x_size = (int)x;
+//    int y_size = (int)y;
+//    int z_size = (int)z;
+
+//    qDebug() << qPrintable(QString::number(x_size,10));
+//    qDebug() << qPrintable(QString::number(y_size,10));
+//    qDebug() << qPrintable(QString::number(z_size,10));
+
+
+    // concatenation of input volumn size by format [x,y,z] and show on the stautsbar.
+    QString sQStringx = QString::number(x);
+    QString sQStringy = QString::number(y);
+    QString sQStringz = QString::number(z);
+    QString Message = QString("[" + sQStringx +","+ sQStringy +","+ sQStringz+"]");
+    emit sendMessage(Message);
+}
+
+
 
 void glObject::draw()
 {

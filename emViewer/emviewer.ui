@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>324</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="openAct"/>
+    <addaction name="OpenAct"/>
     <addaction name="ExitAct"/>
    </widget>
    <addaction name="menu_File"/>
@@ -50,7 +50,7 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="openAct">
+  <action name="OpenAct">
    <property name="text">
     <string>&amp;Open File</string>
    </property>

@@ -2,6 +2,7 @@
 #define EMVIEWER_H
 
 #include <QMainWindow>
+#include <QLabel>
 
 namespace Ui {
 class EMviewer;
@@ -16,9 +17,11 @@ public:
     ~EMviewer();
 
 public slots:
+    void showMessage(QString &Message);
 
 private:
     Ui::EMviewer *ui;
+    QLabel *statusLabel;
 };
 
 #endif // EMVIEWER_H

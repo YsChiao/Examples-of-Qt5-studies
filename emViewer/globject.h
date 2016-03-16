@@ -23,6 +23,9 @@ public:
 public slots:
     void open();
 
+signals:
+    void sendMessage(QString& Message);
+
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
@@ -36,6 +39,7 @@ protected:
 
 private:
     void draw();
+    void processing();
 
     int xRot;
     int yRot;
