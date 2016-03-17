@@ -22,3 +22,6 @@ HEADERS  += emviewer.h \
 FORMS    += emviewer.ui
 
 LIBS += -lopengl32 -lglu32
+
+RESOURCES += \
+    resource.qrc

@@ -177,17 +177,17 @@ void glObject::resizeGL(int width, int height)
 
 }
 
-
-void glObject::processing()
+void glObject::getFileSize(const QByteArray& fileData, QVector3D& fileDataSize)
 {
     // concatenation the binary data and get the size of volumn
     unsigned int x, y, z;
+    unsigned char a, b, c, d;
     for(int n = 4; n < 16; n += 4)
     {
-        unsigned char a = (unsigned char)fileData.at(n);
-        unsigned char b = (unsigned char)fileData.at(n+1);
-        unsigned char c = (unsigned char)fileData.at(n+2);
-        unsigned char d = (unsigned char)fileData.at(n+3);
+        a = (unsigned char)fileData.at(n);
+        b = (unsigned char)fileData.at(n+1);
+        c = (unsigned char)fileData.at(n+2);
+        d = (unsigned char)fileData.at(n+3);
 
         if(n == 4)
         {
@@ -202,17 +202,17 @@ void glObject::processing()
             z = a | (b<<8) | (c<<16) | (d<<24);
         }
     }
-//    qDebug() << qPrintable(QString::number(x,16));
-//    qDebug() << qPrintable(QString::number(y,16));
-//    qDebug() << qPrintable(QString::number(z,16));
+    //    qDebug() << qPrintable(QString::number(x,16));
+    //    qDebug() << qPrintable(QString::number(y,16));
+    //    qDebug() << qPrintable(QString::number(z,16));
 
-//    int x_size = (int)x;
-//    int y_size = (int)y;
-//    int z_size = (int)z;
+    //    int x_size = (int)x;
+    //    int y_size = (int)y;
+    //    int z_size = (int)z;
 
-//    qDebug() << qPrintable(QString::number(x_size,10));
-//    qDebug() << qPrintable(QString::number(y_size,10));
-//    qDebug() << qPrintable(QString::number(z_size,10));
+    //    qDebug() << qPrintable(QString::number(x_size,10));
+    //    qDebug() << qPrintable(QString::number(y_size,10));
+    //    qDebug() << qPrintable(QString::number(z_size,10));
 
 
     // concatenation of input volumn size by format [x,y,z] and show on the stautsbar.
@@ -221,6 +221,49 @@ void glObject::processing()
     QString sQStringz = QString::number(z);
     QString Message = QString("[" + sQStringx +","+ sQStringy +","+ sQStringz+"]");
     emit sendMessage(Message);
+
+    fileDataSize.setX(float(x));
+    fileDataSize.setY(float(y));
+    fileDataSize.setZ(float(z));
+
+}
+
+
+void glObject::FileDataBinaryToFloat(const QByteArray& fileData, QVector<float>& fileDataFloat)
+{
+    int fileHead = 512;
+    int typeLength = 4;
+
+    // concatenation the binary data
+    unsigned int value;
+    unsigned char a, b, c, d;
+    for(int n = fileHead; n < fileData.length(); n += typeLength)
+    {
+        a = (unsigned char)fileData.at(n);
+        b = (unsigned char)fileData.at(n+1);
+        c = (unsigned char)fileData.at(n+2);
+        d = (unsigned char)fileData.at(n+3);
+
+        value = a | (b<<8) | (c<<16) | (d<<24);
+        int sign = (value & 0x80000000) ? -1 : 1;
+        float exponent = (int)((value >> 23)&0xff) - 127;
+        float mantissa = 1 + (float)((value & 0x7fffff)) / (float)(0x7fffff);
+        float valueFloat =  sign * mantissa * std::pow(2.0, exponent);
+        fileDataFloat.push_back(valueFloat);
+    }
+}
+
+
+
+void glObject::processing()
+{
+    QVector3D fileDataSize;
+    QVector<float> fileDataFloat;
+
+    // get size of volumn
+    getFileSize(fileData, fileDataSize);
+    // convert volumn data from binary to float
+    FileDataBinaryToFloat(fileData, fileDataFloat);
 }
 
 

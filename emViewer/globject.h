@@ -39,6 +39,8 @@ protected:
 
 private:
     void draw();
+    void getFileSize(const QByteArray&, QVector3D&);
+    void FileDataBinaryToFloat(const QByteArray&, QVector<float>&);
     void processing();
 
     int xRot;
