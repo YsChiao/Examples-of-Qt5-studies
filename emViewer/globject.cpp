@@ -1,11 +1,31 @@
 #include "globject.h"
+#include <cmath>
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingOpenGL)
+VTK_MODULE_INIT(vtkInteractionStyle)
+
+#include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkImageActor.h>
+#include <vtkActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkInteractorStyleImage.h>
+
+#include <vtkImageImport.h>
+
+#include <QFileDialog>
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QMessageBox>
+#include <QVector3D>
 
 glObject::glObject(QWidget* parent)
-    : QOpenGLWidget(parent)
+    : QVTKWidget(parent)
 {
-    xRot = 0;
-    yRot = 0;
-    zRot = 0;
+
 }
 
 glObject::~glObject()
@@ -45,136 +65,6 @@ QSize glObject::minimumSizeHint() const
 QSize glObject::sizeHint() const
 {
     return QSize(400,400);
-}
-
-static void qNormalizeAngle(int& angle)
-{
-    while(angle < 0)
-        angle += 360 * 16;
-    while(angle > 360)
-        angle -= 360 * 16;
-}
-
-void glObject::setXRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if(angle != xRot)
-    {
-        xRot = angle;
-        update();
-    }
-}
-
-void glObject::setYRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if(angle != yRot)
-    {
-        yRot = angle;
-        update();
-
-    }
-}
-
-void glObject::setZRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if(angle != zRot)
-    {
-        zRot = angle;
-        update();
-    }
-}
-
-
-void glObject::mousePressEvent(QMouseEvent *event)
-{
-    lastPos = event->pos();
-
-}
-
-void glObject::mouseMoveEvent(QMouseEvent *event)
-{
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-
-    if(event->buttons() & Qt::LeftButton)
-    {
-        setXRotation(xRot + 8 * dy);
-        setYRotation(yRot + 8 * dx);
-    }
-    else if(event->buttons() & Qt::RightButton)
-    {
-        setXRotation(xRot + 8 * dy);
-        setYRotation(zRot + 8 * dx);
-    }
-    lastPos = event->pos();
-}
-
-
-void glObject::initializeGL()
-{
-    initializeOpenGLFunctions();
-    glClearColor(0,0,0,1);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_SMOOTH);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHTING);
-    //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    //glEnable(GL_COLOR_MATERIAL);
-
-    static GLfloat lightPosition[4] = {0, 0, 10, 1.0};
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-
-}
-
-void glObject::paintGL()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    //    glBegin(GL_TRIANGLES);
-    //    glColor3f(1.0, 0.0, 0.0);
-    //    glVertex3f(-0.5, -0.5, 0);
-    //    glColor3f(0.0, 1.0, 0.0);
-    //    glVertex3f( 0.5, -0.5, 0);
-    //    glColor3f(0.0, 0.0, 1.0);
-    //    glVertex3f( 0.0,  0.5, 0);
-    //    glEnd();
-
-
-
-    glTranslatef(0.0, 0.0, -10.0);
-    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-    glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-    draw();
-
-}
-
-void glObject::resizeGL(int width, int height)
-{
-    //    glViewport(0,0,width,height);
-    //    glMatrixMode(GL_PROJECTION);
-    //    glLoadIdentity();
-    //    gluPerspective(45, (float)width/height, 0.01, 100.0);
-    //    glMatrixMode(GL_MODELVIEW);
-    //    glLoadIdentity();
-    //    gluLookAt(0,0,5,0,0,0,0,1,0);
-
-    int side = qMin(width, height);
-    glViewport((width - side) / 2, (height - side) / 2, side, side);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-#ifdef QT_OPENGL_ES_1
-    glOrthof(-2, +2, -2, +2, 1.0, 15.0);
-#else
-    glOrtho(-2, +2, -2, +2, 1.0, 15.0);
-#endif
-    glMatrixMode(GL_MODELVIEW);
-
 }
 
 void glObject::getFileSize(const QByteArray& fileData, QVector3D& fileDataSize)
@@ -237,7 +127,7 @@ void glObject::FileDataBinaryToFloat(const QByteArray& fileData, QVector<float>&
     // concatenation the binary data
     unsigned int value;
     unsigned char a, b, c, d;
-    for(int n = fileHead; n < fileData.length(); n += typeLength)
+    for(int n = fileHead; n < fileData.length(); n = n + typeLength)
     {
         a = (unsigned char)fileData.at(n);
         b = (unsigned char)fileData.at(n+1);
@@ -251,9 +141,55 @@ void glObject::FileDataBinaryToFloat(const QByteArray& fileData, QVector<float>&
         float valueFloat =  sign * mantissa * std::pow(2.0, exponent);
         fileDataFloat.push_back(valueFloat);
     }
+
+    // normalize the data from -3sigma to 3sigma
+    int length = fileDataFloat.length();
+    float min = *std::min_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
+    float max = *std::max_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
+
+    float sum = 0;
+    for(int i = 0; i < fileDataFloat.length(); i++)
+    {
+        sum += fileDataFloat[i];
+    }
+
+    float mean = 0;
+    float sigma = 0;
+    mean = sum / length;
+    for(int i = 0; i < length; i++)
+    {
+        sigma += ((fileDataFloat[i] - mean) * (fileDataFloat[i] - mean));
+    }
+    sigma = std::sqrt(sigma/length);
+
+//    qDebug() << qPrintable(QString::number(min));
+//    qDebug() << qPrintable(QString::number(max));
+//    qDebug() << qPrintable(QString::number(length));
+//    qDebug() << qPrintable(QString::number(mean));
+//    qDebug() << qPrintable(QString::number(sum));
+//    qDebug() << qPrintable(QString::number(sigma));
+//    qDebug() << "Data.................................";
+
+    // normalization
+    for(int i = 0; i < length; i++)
+    {
+        fileDataFloat[i] = ((fileDataFloat[i] - min) / (max - min));
+    }
+
+    // smooth
+    for(int i = 0; i < length; i++)
+    {
+        if(fileDataFloat[i] > (3*sigma + mean))
+        {
+            fileDataFloat[i] = 1;
+        }
+        if(fileDataFloat[i] < (-3*sigma + mean))
+        {
+            fileDataFloat[i] = 0;
+        }
+    }
+
 }
-
-
 
 void glObject::processing()
 {
@@ -264,45 +200,81 @@ void glObject::processing()
     getFileSize(fileData, fileDataSize);
     // convert volumn data from binary to float
     FileDataBinaryToFloat(fileData, fileDataFloat);
+
+//    //check data value
+//    qDebug() << qPrintable(QString::number(fileDataFloat[0]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[1]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[2]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[3]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[4]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[5]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[6]));
+//    qDebug() << qPrintable(QString::number(fileDataFloat[7]));
+
+    draw(fileDataFloat, fileDataSize);
 }
 
 
-
-void glObject::draw()
+void glObject::draw(QVector<float>& fileDataFloat, QVector3D& fileDataSize )
 {
+    // size of image
+    int x = fileDataSize.x();
+    int y = fileDataSize.y();
+    int z = fileDataSize.z();
 
-    glBegin(GL_QUADS);
-    glNormal3f(0,0,-1);
-    glVertex3f(-1,-1,0);
-    glVertex3f(-1,1,0);
-    glVertex3f(1,1,0);
-    glVertex3f(1,-1,0);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    glNormal3f(0,-1,0.707);
-    glVertex3f(-1,-1,0);
-    glVertex3f(1,-1,0);
-    glVertex3f(0,0,1.414);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    glNormal3f(1,0, 0.707);
-    glVertex3f(1,-1,0);
-    glVertex3f(1,1,0);
-    glVertex3f(0,0,1.414);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    glNormal3f(0,1,0.707);
-    glVertex3f(1,1,0);
-    glVertex3f(-1,1,0);
-    glVertex3f(0,0,1.414);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    glNormal3f(-1,0,0.707);
-    glVertex3f(-1,1,0);
-    glVertex3f(-1,-1,0);
-    glVertex3f(0,0,1.414);
-    glEnd();
+    // data of image
+    std::vector<float> data = fileDataFloat.toStdVector();
+    float *Image = &data[0];
+
+
+    // Convert the c-tyle image to a vtkImageData
+    vtkSmartPointer<vtkImageImport> imageImport =
+            vtkSmartPointer<vtkImageImport>::New();
+    imageImport->SetDataSpacing(1,1,1);
+    imageImport->SetDataOrigin(0,0,0);
+    imageImport->SetWholeExtent(0, x-1, 0, y-1, 0, z-1);
+    imageImport->SetDataExtentToWholeExtent();
+    imageImport->SetDataScalarTypeToUnsignedChar();
+    imageImport->SetNumberOfScalarComponents(1);
+    imageImport->SetImportVoidPointer(Image);
+    imageImport->Update();
+
+    // Create an actor
+    vtkSmartPointer<vtkImageActor> actor =
+            vtkSmartPointer<vtkImageActor>::New();
+#if VTK_MAJOR_VERSION <= 5
+    actor->SetInput(imageImport->GetOutput());
+#else
+    actor->SetInputData(imageImport->GetOutput());
+#endif
+
+    // Setup renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+            vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddActor(actor);
+    renderer->ResetCamera();
+
+    // Setup render window
+    vtkSmartPointer<vtkRenderWindow> renderWindow =
+            vtkSmartPointer<vtkRenderWindow>::New();
+    renderWindow->AddRenderer(renderer);
+
+    // Setup render window interactor
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+            vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    vtkSmartPointer<vtkInteractorStyleImage> style =
+            vtkSmartPointer<vtkInteractorStyleImage>::New();
+
+    renderWindowInteractor->SetInteractorStyle(style);
+
+    // Render and start interaction
+    renderWindowInteractor->SetRenderWindow(renderWindow);
+    renderWindowInteractor->Initialize();
+
+    renderWindowInteractor->Start();
 }
+
+
 
 
 

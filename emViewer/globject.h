@@ -1,24 +1,15 @@
 #ifndef GLOBJECT_H
 #define GLOBJECT_H
 
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QtOpenGL>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <QVTKWidget.h>
 
-
-class glObject : public QOpenGLWidget, protected QOpenGLFunctions
+class glObject : public QVTKWidget
 {
     Q_OBJECT
 
 public:
-    glObject(QWidget* parent = 0);
+    explicit glObject(QWidget* parent = 0);
     ~glObject();
-
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
 
 public slots:
     void open();
@@ -27,27 +18,15 @@ signals:
     void sendMessage(QString& Message);
 
 protected:
-    void initializeGL() Q_DECL_OVERRIDE;
-    void paintGL() Q_DECL_OVERRIDE;
-    void resizeGL(int width, int height) Q_DECL_OVERRIDE;
-
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
 
 private:
-    void draw();
     void getFileSize(const QByteArray&, QVector3D&);
     void FileDataBinaryToFloat(const QByteArray&, QVector<float>&);
+    void draw(QVector<float>&, QVector3D&);
     void processing();
-
-    int xRot;
-    int yRot;
-    int zRot;
-
-    QPoint lastPos;
     QByteArray fileData;
 };
 

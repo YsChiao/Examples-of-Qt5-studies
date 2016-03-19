@@ -1,29 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-03-15T22:18:37
-#
-#-------------------------------------------------
-
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = EMviewer
-TEMPLATE = app
-
-
-SOURCES += main.cpp\
-        emviewer.cpp \
-    globject.cpp
-
-HEADERS  += emviewer.h \
-    globject.h
-
-FORMS    += emviewer.ui
-
-RESOURCES += \
-    resource.qrc
-
 INCLUDEPATH += C:/VTK/VTK_bin_debug/install/include/vtk-6.3
 LIBS += -LC:/VTK/VTK_bin_debug/install/lib/ \
 -llibvtkalglib-6.3d \
@@ -137,5 +111,3 @@ LIBS += -LC:/VTK/VTK_bin_debug/install/lib/ \
 -llibvtkViewsInfovis-6.3d \
 -llibvtkViewsQt-6.3d \
 -llibvtkzlib-6.3d \
-
-
