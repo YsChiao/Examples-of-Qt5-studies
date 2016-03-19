@@ -5,15 +5,17 @@ VTK_MODULE_INIT(vtkRenderingOpenGL)
 VTK_MODULE_INIT(vtkInteractionStyle)
 
 #include <vtkSmartPointer.h>
-#include <vtkSphereSource.h>
-#include <vtkPolyDataMapper.h>
 #include <vtkImageActor.h>
 #include <vtkActor.h>
-#include <vtkRenderWindow.h>
+#include <vtkActor2D.h>
 #include <vtkRenderer.h>
-#include <vtkInteractorStyleImage.h>
+#include <vtkRenderWindow.h>
+#include <vtkImageData.h>
+#include <vtkImageMapper.h>
+#include <vtkFloatArray.h>
+#include <vtkPointData.h>
 
-#include <vtkImageImport.h>
+#include <vtkDataSetMapper.h>
 
 #include <QFileDialog>
 #include <QDebug>
@@ -47,7 +49,8 @@ void glObject::open()
         else
         {
             fileData = file.readAll();
-            processing();
+            SliceProcessing();
+            //VolumeProcessing();
         }
     }
     else
@@ -162,13 +165,13 @@ void glObject::FileDataBinaryToFloat(const QByteArray& fileData, QVector<float>&
     }
     sigma = std::sqrt(sigma/length);
 
-//    qDebug() << qPrintable(QString::number(min));
-//    qDebug() << qPrintable(QString::number(max));
-//    qDebug() << qPrintable(QString::number(length));
-//    qDebug() << qPrintable(QString::number(mean));
-//    qDebug() << qPrintable(QString::number(sum));
-//    qDebug() << qPrintable(QString::number(sigma));
-//    qDebug() << "Data.................................";
+    //    qDebug() << qPrintable(QString::number(min));
+    //    qDebug() << qPrintable(QString::number(max));
+    //    qDebug() << qPrintable(QString::number(length));
+    //    qDebug() << qPrintable(QString::number(mean));
+    //    qDebug() << qPrintable(QString::number(sum));
+    //    qDebug() << qPrintable(QString::number(sigma));
+    //    qDebug() << "Data.................................";
 
     // normalization
     for(int i = 0; i < length; i++)
@@ -189,89 +192,167 @@ void glObject::FileDataBinaryToFloat(const QByteArray& fileData, QVector<float>&
         }
     }
 
+    //    //check data value
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[0]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[1]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[2]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[3]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[4]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[5]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[6]));
+    //    qDebug() << qPrintable(QString::number(fileDataFloat[7]));
+
 }
 
-void glObject::processing()
-{
-    QVector3D fileDataSize;
-    QVector<float> fileDataFloat;
 
-    // get size of volumn
+void glObject::FileDataToSliceVtkImageData(QVector<float>& fileDataFloat, const QVector3D& fileDataSize,
+                                           int& zAix, vtkImageData* imageData)
+{
+    // get size of origin data
+    int xLength = fileDataSize.x();
+    int yLength = fileDataSize.y();
+    int offset  = xLength*yLength*zAix;
+
+    // Specify the size of the image data
+    imageData->SetDimensions(xLength, yLength, 1);
+    imageData->AllocateScalars(VTK_FLOAT, 1);
+
+    // fill every entry of the image with data
+    int temp = 0;
+    for(int y = 0; y < yLength; y++)
+    {
+        for(int x=0; x < xLength; x++)
+        {
+            float* pixel = static_cast<float*>(imageData->GetScalarPointer(x, y, 0));
+            pixel[0] = fileDataFloat[temp+offset];
+            temp++;
+        }
+    }
+    imageData->Modified();
+}
+
+
+void glObject::FileDataToVtkImageData(QVector<float>& fileDataFloat, const QVector3D& fileDataSize,
+                                      vtkImageData* imageData)
+{
+    int xLength = fileDataSize.x();
+    int yLength = fileDataSize.y();
+    int zLength = fileDataSize.z();
+    // create an image data
+    //vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+
+    // Specify the size of the image data
+    imageData->SetDimensions(xLength, yLength, zLength);
+    imageData->SetSpacing(1.0, 1.0, 1.0);
+    imageData->SetOrigin(0.0, 0.0, 0.0);
+    imageData->AllocateScalars(VTK_FLOAT, 1);
+
+    //    int numberOfPoints = imageData->GetNumberOfPoints();
+    //    int numberOfCells  = imageData->GetNumberOfCells();
+    //    qDebug() << "Number of points" << qPrintable(QString::number(numberOfPoints));
+    //    qDebug() << "Number of Cells"  << qPrintable(QString::number(numberOfCells));
+
+    // fill every entry of the image with data
+    int temp = 0;
+    for(int z = 0; z < zLength; z++)
+    {
+        for(int y = 0; y < yLength; y++)
+        {
+            for(int x=0; x < xLength; x++)
+            {
+                float* pixel = static_cast<float*>(imageData->GetScalarPointer(x, y, z));
+                pixel[0] = fileDataFloat[temp];
+                temp++;
+            }
+        }
+    }
+    imageData->Modified();
+}
+
+
+void glObject::drawVolume(vtkImageData* imageData)
+{
+    vtkSmartPointer<vtkImageData> imageSource = vtkSmartPointer<vtkImageData>::New();
+    imageSource = imageData;
+
+    vtkSmartPointer<vtkDataSetMapper> imageMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    imageMapper->SetInputData(imageSource);
+
+    vtkSmartPointer<vtkActor> imageActor = vtkSmartPointer<vtkActor>::New();
+    imageActor->SetMapper(imageMapper);
+
+    // VTK Render
+    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddActor(imageActor);
+
+    // VTK/Qtwidget
+    GetRenderWindow()->AddRenderer(renderer);
+
+}
+
+void glObject::drawSlice(vtkImageData* imageData)
+{
+    vtkSmartPointer<vtkImageData> imageSource = vtkSmartPointer<vtkImageData>::New();
+    imageSource = imageData;
+
+    vtkSmartPointer<vtkImageMapper> imageMapper = vtkSmartPointer<vtkImageMapper>::New();
+    imageMapper->SetInputData(imageSource);
+    imageMapper->SetColorWindow(255);
+    imageMapper->SetColorLevel(127.5);
+
+    vtkSmartPointer<vtkActor2D> imageActor = vtkSmartPointer<vtkActor2D>::New();
+    imageActor->SetMapper(imageMapper);
+
+    // VTK Render
+    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    renderer->AddActor(imageActor);
+
+    // VTK/Qtwidget
+    GetRenderWindow()->AddRenderer(renderer);
+
+}
+
+void glObject::SliceProcessing()
+{
+    QVector<float> fileDataFloat;
+    QVector3D fileDataSize;
+    vtkImageData *fileDataSliceVtkImageData = vtkImageData::New();
+
+    // get size of volume
+    getFileSize(fileData, fileDataSize);
+    // convert volumn data from binary to float
+    FileDataBinaryToFloat(fileData, fileDataFloat);
+    // get middle slice
+    int zAix = (int)(fileDataSize.z()/2);
+    FileDataToSliceVtkImageData(fileDataFloat, fileDataSize, zAix, fileDataSliceVtkImageData);
+
+    // display 2D volumn
+    drawVolume(fileDataSliceVtkImageData);
+
+
+}
+
+void glObject::VolumeProcessing()
+{
+    QVector<float> fileDataFloat;
+    QVector3D fileDataSize;
+    vtkImageData *fileDataVtkImageData = vtkImageData::New();
+
+    // get size of volume
     getFileSize(fileData, fileDataSize);
     // convert volumn data from binary to float
     FileDataBinaryToFloat(fileData, fileDataFloat);
 
-//    //check data value
-//    qDebug() << qPrintable(QString::number(fileDataFloat[0]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[1]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[2]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[3]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[4]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[5]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[6]));
-//    qDebug() << qPrintable(QString::number(fileDataFloat[7]));
+    // convert float volume data to vtkImageData
+    FileDataToVtkImageData(fileDataFloat, fileDataSize, fileDataVtkImageData);
 
-    draw(fileDataFloat, fileDataSize);
-}
+    //    // check data
+    //    float* pixel = static_cast<float*>(fileDataVtkImageData->GetScalarPointer(7,0,0));
+    //    qDebug() << qPrintable(QString::number(pixel[0]));
 
 
-void glObject::draw(QVector<float>& fileDataFloat, QVector3D& fileDataSize )
-{
-    // size of image
-    int x = fileDataSize.x();
-    int y = fileDataSize.y();
-    int z = fileDataSize.z();
-
-    // data of image
-    std::vector<float> data = fileDataFloat.toStdVector();
-    float *Image = &data[0];
-
-
-    // Convert the c-tyle image to a vtkImageData
-    vtkSmartPointer<vtkImageImport> imageImport =
-            vtkSmartPointer<vtkImageImport>::New();
-    imageImport->SetDataSpacing(1,1,1);
-    imageImport->SetDataOrigin(0,0,0);
-    imageImport->SetWholeExtent(0, x-1, 0, y-1, 0, z-1);
-    imageImport->SetDataExtentToWholeExtent();
-    imageImport->SetDataScalarTypeToUnsignedChar();
-    imageImport->SetNumberOfScalarComponents(1);
-    imageImport->SetImportVoidPointer(Image);
-    imageImport->Update();
-
-    // Create an actor
-    vtkSmartPointer<vtkImageActor> actor =
-            vtkSmartPointer<vtkImageActor>::New();
-#if VTK_MAJOR_VERSION <= 5
-    actor->SetInput(imageImport->GetOutput());
-#else
-    actor->SetInputData(imageImport->GetOutput());
-#endif
-
-    // Setup renderer
-    vtkSmartPointer<vtkRenderer> renderer =
-            vtkSmartPointer<vtkRenderer>::New();
-    renderer->AddActor(actor);
-    renderer->ResetCamera();
-
-    // Setup render window
-    vtkSmartPointer<vtkRenderWindow> renderWindow =
-            vtkSmartPointer<vtkRenderWindow>::New();
-    renderWindow->AddRenderer(renderer);
-
-    // Setup render window interactor
-    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-            vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    vtkSmartPointer<vtkInteractorStyleImage> style =
-            vtkSmartPointer<vtkInteractorStyleImage>::New();
-
-    renderWindowInteractor->SetInteractorStyle(style);
-
-    // Render and start interaction
-    renderWindowInteractor->SetRenderWindow(renderWindow);
-    renderWindowInteractor->Initialize();
-
-    renderWindowInteractor->Start();
+    // display 3D image
+    drawSlice(fileDataVtkImageData);
 }
 
 

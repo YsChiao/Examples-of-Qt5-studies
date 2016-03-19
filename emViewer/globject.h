@@ -25,8 +25,12 @@ protected:
 private:
     void getFileSize(const QByteArray&, QVector3D&);
     void FileDataBinaryToFloat(const QByteArray&, QVector<float>&);
-    void draw(QVector<float>&, QVector3D&);
-    void processing();
+    void FileDataToVtkImageData(QVector<float>&, const QVector3D&, vtkImageData*);
+    void FileDataToSliceVtkImageData(QVector<float>&, const QVector3D&, int&, vtkImageData*);
+    void drawVolume(vtkImageData*);
+    void drawSlice(vtkImageData*);
+    void VolumeProcessing();
+    void SliceProcessing();
     QByteArray fileData;
 };
 
