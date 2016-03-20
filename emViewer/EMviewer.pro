@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         emviewer.cpp \
-    globject.cpp
+    globject.cpp \
+    emfile.cpp
 
 HEADERS  += emviewer.h \
-    globject.h
+    globject.h \
+    emfile.h
 
 FORMS    += emviewer.ui
 
