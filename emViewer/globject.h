@@ -33,9 +33,10 @@ private:
     void FileDataToVtkImageData(vtkImageData*);
     void FileDataToSliceVtkImageData(int&, vtkImageData*);
 
-    void drawVolume(vtkImageData*);
-    void drawSlice(vtkImageData*);
+//    void drawVolume(vtkImageData*);
+//    void drawSlice(vtkImageData*);
 
+    void draw(vtkImageData*);
     void VolumeProcessing();
     void SliceProcessing();
     void Information();

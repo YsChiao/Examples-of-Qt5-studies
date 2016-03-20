@@ -332,7 +332,7 @@ void glObject::FileDataToVtkImageData(vtkImageData* imageData)
 }
 
 
-void glObject::drawVolume(vtkImageData* imageData)
+void glObject::draw(vtkImageData* imageData)
 {
     vtkSmartPointer<vtkImageData> imageSource = vtkSmartPointer<vtkImageData>::New();
     imageSource = imageData;
@@ -353,26 +353,25 @@ void glObject::drawVolume(vtkImageData* imageData)
 
 }
 
-void glObject::drawSlice(vtkImageData* imageData)
-{
+//void glObject::drawSlice(vtkImageData* imageData)
+//{
 
-    vtkSmartPointer<vtkImageData> imageSource = vtkSmartPointer<vtkImageData>::New();
-    imageSource = imageData;
+//    vtkSmartPointer<vtkImageData> imageSource = vtkSmartPointer<vtkImageData>::New();
+//    imageSource = imageData;
 
-    vtkSmartPointer<vtkDataSetMapper> imageMapper = vtkSmartPointer<vtkDataSetMapper>::New();
-    imageMapper->SetInputData(imageSource);
+//    vtkSmartPointer<vtkDataSetMapper> imageMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+//    imageMapper->SetInputData(imageSource);
 
-    vtkSmartPointer<vtkActor> imageActor = vtkSmartPointer<vtkActor>::New();
-    imageActor->SetMapper(imageMapper);
+//    vtkSmartPointer<vtkActor> imageActor = vtkSmartPointer<vtkActor>::New();
+//    imageActor->SetMapper(imageMapper);
 
-    // VTK Render
-    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-    renderer->AddActor(imageActor);
+//    // VTK Render
+//    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+//    renderer->AddActor(imageActor);
 
-    // VTK/Qtwidget
-    GetRenderWindow()->AddRenderer(renderer);
-
-}
+//    // VTK/Qtwidget
+//    GetRenderWindow()->AddRenderer(renderer);
+//}
 
 void glObject::SliceProcessing()
 {
@@ -384,7 +383,7 @@ void glObject::SliceProcessing()
     FileDataToSliceVtkImageData(zAix, fileDataSliceVtkImageData);
 
     // display 2D volumn
-    drawSlice(fileDataSliceVtkImageData);
+    draw(fileDataSliceVtkImageData);
 
     // status bar information
     Information();
@@ -399,7 +398,7 @@ void glObject::VolumeProcessing()
     FileDataToVtkImageData(fileDataVtkImageData);
 
     // display 3D image
-    drawVolume(fileDataVtkImageData);
+    draw(fileDataVtkImageData);
 
     // status bar information
     Information();
@@ -407,7 +406,7 @@ void glObject::VolumeProcessing()
 
 void glObject::Information()
 {
-    // get size information
+    // get size and type information
     QString sQStringx = QString::number(dims[0]);
     QString sQStringy = QString::number(dims[1]);
     QString sQStringz = QString::number(dims[2]);
