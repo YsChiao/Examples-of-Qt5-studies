@@ -1,6 +1,7 @@
 #ifndef GLOBJECT_H
 #define GLOBJECT_H
 
+#include "emfile.h"
 #include <QVTKWidget.h>
 
 class glObject : public QVTKWidget
@@ -23,15 +24,27 @@ protected:
     QSize sizeHint() const;
 
 private:
-    void getFileSize(const QByteArray&, QVector3D&);
-    void FileDataBinaryToFloat(const QByteArray&, QVector<float>&);
-    void FileDataToVtkImageData(QVector<float>&, const QVector3D&, vtkImageData*);
-    void FileDataToSliceVtkImageData(QVector<float>&, const QVector3D&, int&, vtkImageData*);
+
+    void readFile(const QString& fileName);
+
+//    void getFileSize(const QByteArray&, QVector3D&);
+//    void FileDataBinaryToFloat(const QByteArray&, QVector<float>&);
+
+    void FileDataToVtkImageData(vtkImageData*);
+    void FileDataToSliceVtkImageData(int&, vtkImageData*);
+
     void drawVolume(vtkImageData*);
     void drawSlice(vtkImageData*);
+
     void VolumeProcessing();
     void SliceProcessing();
-    QByteArray fileData;
+    void Information();
+
+//    QByteArray fileData;
+
+    QVector<float> fileDataFloat;
+    QString fileDataType;
+    int dims[3];
 };
 
 #endif
