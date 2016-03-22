@@ -15,13 +15,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         emviewer.cpp \
     globject.cpp \
-    emfile.cpp
+    emfile.cpp \
+    gloperator.cpp
 
 HEADERS  += emviewer.h \
     globject.h \
-    emfile.h
+    emfile.h \
+    gloperator.h
 
-FORMS    += emviewer.ui
+FORMS    += emviewer.ui \
+    gloperator.ui
 
 RESOURCES += \
     resource.qrc
