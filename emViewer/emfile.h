@@ -16,18 +16,18 @@ public:
     EmFile(const char* infile);
     ~EmFile();
 
+    // copy constructor
+    EmFile(const EmFile& emFile);
+    // assignment operator
+    EmFile& operator = (const EmFile& emFile);
 
     void Dims(int* dims);
-    void Type(std::string&);
-
-    std::vector<unsigned char> embytedata;
-    std::vector<int> emintata;
-    std::vector<float> emfloatdata;
-
+    void Type(unsigned char& type);
+    void ByteData(std::vector<unsigned char>& fileDataByte);
+    void IntData(std::vector<int>& fileDataInt);
+    void FloatData(std::vector<float>& fileDataFloat);
 
 private:
-    EmFile(const EmFile&);
-    EmFile& operator = (const EmFile&);
 
     unsigned char magic[1];
     char dummya[2];
@@ -36,6 +36,10 @@ private:
     char comment[80];
     int emdata[40];
     char dummyb[256];
+
+    std::vector<unsigned char> embytedata;
+    std::vector<int> emintdata;
+    std::vector<float> emfloatdata;
 };
 
 #endif // EMFILE_H

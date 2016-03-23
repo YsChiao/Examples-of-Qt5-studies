@@ -58,7 +58,7 @@ EmFile::EmFile(const char *infile)
         fread (intdata, 2, size, input);
         for (int i = 0; i < size; i++)
         {
-            emintata.push_back(intdata[i]);
+            emintdata.push_back(intdata[i]);
         }
         delete [] intdata;
         break;
@@ -83,6 +83,45 @@ EmFile::EmFile(const char *infile)
     fclose (input);
 }
 
+EmFile::EmFile(const EmFile& emFile)
+{
+    // copy arrays
+    std::copy(emFile.magic, emFile.magic+1, magic);
+    std::copy(emFile.dummya, emFile.dummya+2, dummya);
+    std::copy(emFile.type, emFile.type+1, type);
+    std::copy(emFile.dims, emFile.dims+3, dims);
+    std::copy(emFile.comment, emFile.comment+80, comment);
+    std::copy(emFile.emdata, emFile.emdata+40, emdata);
+    std::copy(emFile.dummyb, emFile.dummyb+256, dummyb);
+
+    embytedata = emFile.embytedata;
+    emintdata = emFile.emintdata;
+    emfloatdata = emFile.emfloatdata;
+}
+
+EmFile& EmFile::operator = (const EmFile& emFile)
+{
+    // check for self-assignment
+    if(this == &emFile)
+    {
+        return *this;
+    }
+
+    std::copy(emFile.magic, emFile.magic+1, magic);
+    std::copy(emFile.dummya, emFile.dummya+2, dummya);
+    std::copy(emFile.type, emFile.type+1, type);
+    std::copy(emFile.dims, emFile.dims+3, dims);
+    std::copy(emFile.comment, emFile.comment+80, comment);
+    std::copy(emFile.emdata, emFile.emdata+40, emdata);
+    std::copy(emFile.dummyb, emFile.dummyb+256, dummyb);
+
+    embytedata = emFile.embytedata;
+    emintdata = emFile.emintdata;
+    emfloatdata = emFile.emfloatdata;
+
+    return *this;
+}
+
 EmFile::~EmFile()
 {
 }
@@ -95,23 +134,48 @@ void EmFile::Dims(int* vdims)
     vdims[2] = dims[2];
 }
 
-void EmFile::Type(std::string &vtype)
+void EmFile::Type(unsigned char& vtype)
 {
     switch(type[0])
     {
     case 1:
     {
-        vtype = "unsigned char,8bit";
+        vtype = 1;
     }
     case 2:
     {
-        vtype = "int,16bit";
+        vtype = 2;
     }
     case 5:
     {
-        vtype = "float,32bit";
+        vtype = 5;
     }
     }
 }
+
+void EmFile::ByteData(std::vector<unsigned char>& fileDataByte)
+{
+    fileDataByte = embytedata;
+}
+
+void EmFile::IntData(std::vector<int>& fileDataInt)
+{
+    fileDataInt = emintdata;
+}
+
+void EmFile::FloatData(std::vector<float>& fileDataFloat)
+{
+    fileDataFloat = emfloatdata;
+}
+
+
+
+
+
+
+
+
+
+
 
 
