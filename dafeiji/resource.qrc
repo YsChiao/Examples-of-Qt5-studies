@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/backgroud.jpg</file>
+        <file>images/bullet.png</file>
+        <file>images/icon.png</file>
+        <file>images/tank.png</file>
+        <file>resource/bg_01.jpg</file>
+        <file>resource/bg_02.jpg</file>
+        <file>resource/explosion.mp3</file>
+        <file>resource/font.fnt</file>
+        <file>resource/font_0.png</file>
+        <file>resource/icon36x36.png</file>
+        <file>resource/icon48x48.png</file>
+        <file>resource/icon72x72.png</file>
+        <file>resource/loading.gif</file>
+        <file>resource/plane.png</file>
+        <file>resource/plane.xml</file>
+        <file>resource/shoot.mp3</file>
+    </qresource>
+</RCC>
