@@ -49,6 +49,15 @@ void Bullet::move()
                     if (typeid(*colliding_items.at(i)) == typeid(Enemy))
                     {
                         Scores::instance()->incScores();
+                        // explosion sound
+                        if (explosionSound->state() == QMediaPlayer::PlayingState)
+                        {
+                            explosionSound->setPosition(0);
+                        }
+                        else if (explosionSound->state() == QMediaPlayer::StoppedState)
+                        {
+                            explosionSound->play();
+                        }
                     }
                     this->scene()->removeItem(colliding_items.at(i));
                     this->scene()->removeItem(this);
