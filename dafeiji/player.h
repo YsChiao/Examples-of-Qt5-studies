@@ -11,11 +11,13 @@ class Player : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    Player(QGraphicsPixmapItem* parent = 0);
+    Player(const QPixmap& hero, const QPixmap& bullet, QGraphicsPixmapItem* parent = 0);
     void keyPressEvent(QKeyEvent* event);
 
 private:
     QMediaPlayer *bulletSound;
+    QPixmap hero;
+    QPixmap bullet;
 };
 
 #endif // PLAYER_H

@@ -9,6 +9,11 @@ Health::Health(QGraphicsTextItem *parent) : QGraphicsTextItem(parent)
     setFont(QFont("times", 16));
 }
 
+Health::~Health()
+{
+    delete this->Healths;
+}
+
 void Health::getHealth(int& health)
 {
     health = this->health;
@@ -17,4 +22,5 @@ void Health::getHealth(int& health)
 void Health::deHealth()
 {
     --this->health;
+    setPlainText(QString("Health: ") + QString::number(health));
 }

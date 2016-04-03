@@ -1,15 +1,20 @@
 #include "scores.h"
 #include <QFont>
+#include <QDebug>
 
 
 Scores::Scores(QGraphicsItem *parent) : QGraphicsTextItem(parent)
 {
-    scores = 0;
-
+    this->scores = 0;
     //draw text
-    setPlainText(QString("Score: ") + QString::number(scores));
+    setPlainText(QString("Score: ") + QString::number(this->scores));
     setDefaultTextColor(Qt::gray);
     setFont(QFont("times", 16));
+}
+
+Scores::~Scores()
+{
+    delete this->Score;
 }
 
 void Scores::getScores(int &scores)
@@ -19,5 +24,8 @@ void Scores::getScores(int &scores)
 
 void Scores::incScores()
 {
+    qDebug() << "++scores";
     ++this->scores;
+    setPlainText(QString("Score: ") + QString::number(this->scores));
+
 }

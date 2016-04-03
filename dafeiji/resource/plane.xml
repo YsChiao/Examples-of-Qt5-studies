@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
 <!-- $TexturePacker:SmartUpdate:a400a8873178df5bda648a872990a8b0$ -->
-<TextureAtlas imagePath="plane.png">
+<TextureAtlas imagePath=":/resource/plane.png">
     <SubTexture name="bomb_add" x="144" y="134" width="29" height="46"/>
     <SubTexture name="bomb_icon" x="184" y="117" width="30" height="29"/>
     <SubTexture name="bullet_0" x="112" y="2" width="9" height="17"/>

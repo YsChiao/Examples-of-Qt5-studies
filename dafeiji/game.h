@@ -19,12 +19,12 @@ public:
     Game(QWidget *parent = 0);
     ~Game();
 
-    void xmlParser(QDomElement& root, QString tag, Qtring att);
+signals:
+    void enemyAppear();
 
+public slots:
+    void spawn();
 
-    // game window size
-    static const int WindowsHeight = 480;
-    static const int WindowsWidth = 600;
 
 private:
     QGraphicsScene *scene;
