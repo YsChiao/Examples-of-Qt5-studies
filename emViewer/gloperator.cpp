@@ -16,8 +16,8 @@ glOperator::glOperator(QWidget *parent) :
     // remoe the border of lineEdit
     ui->lineEdit->setStyleSheet("qproperty-frame: false");
 
-    QObject::connect(ui->slider, SIGNAL(valueChanged(int)), this, SLOT(setLevelValue(int)));
     QObject::connect(ui->slider, SIGNAL(valueChanged(int)), this, SLOT(getLevelValue(int)));
+    QObject::connect(ui->slider, SIGNAL(valueChanged(int)), this, SLOT(setLevelValue(int)));
 
 }
 

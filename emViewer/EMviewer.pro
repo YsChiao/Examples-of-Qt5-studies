@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = EMviewer
 TEMPLATE = app
 
+CONFIG += c++11
 
 SOURCES += main.cpp\
         emviewer.cpp \
@@ -29,8 +30,8 @@ FORMS    += emviewer.ui \
 RESOURCES += \
     resource.qrc
 
-INCLUDEPATH += C:/VTK/VTK_bin_debug/install/include/vtk-6.3
-LIBS += -LC:/VTK/VTK_bin_debug/install/lib/ \
+INCLUDEPATH += C:/VTK/include/vtk-6.3
+LIBS += -LC:/VTK/lib/ \
 -llibvtkalglib-6.3d \
 -llibvtkChartsCore-6.3d \
 -llibvtkCommonColor-6.3d \
@@ -142,5 +143,4 @@ LIBS += -LC:/VTK/VTK_bin_debug/install/lib/ \
 -llibvtkViewsInfovis-6.3d \
 -llibvtkViewsQt-6.3d \
 -llibvtkzlib-6.3d \
-
 

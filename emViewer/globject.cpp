@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QVector>
+#include <QTime>
 
 
 #include "globject.h"
@@ -264,19 +265,16 @@ void glObject::FileDataToVtkImageData()
     }
     sigma = std::sqrt(sigma/length);
 
+
+    //  normalize and smooth
     for(int i = 0; i < length; i++)
     {
         fileDataFloat[i] = ((fileDataFloat[i] - min) / (max - min));
-    }
-
-    // smooth
-    for(int i = 0; i < length; i++)
-    {
-        if(fileDataFloat[i] > (3*sigma + mean))
+        if (fileDataFloat[i] > (3*sigma + mean))
         {
             fileDataFloat[i] = 1;
         }
-        if(fileDataFloat[i] < (-3*sigma + mean))
+        else if (fileDataFloat[i] < (-3*sigma + mean))
         {
             fileDataFloat[i] = 0;
         }
@@ -344,6 +342,7 @@ void glObject::drawVolume()
 
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);
+
 }
 
 //void glObject::drawSlice(vtkImageData* imageData)
@@ -380,11 +379,22 @@ void glObject::drawVolume()
 
 void glObject::VolumeProcessing()
 {
+    // compute time consume
+    QTime time_read;
+    time_read.start();
     // convert float volume data to vtkImageData
-    FileDataToVtkImageData();
+    FileDataToVtkImageData(); // loading data;
+    int readtime = time_read.elapsed();
+    std::cout << "read file time consumes : " << readtime << " ms" << std::endl;
 
+    // compute time consume
+    QTime time_rendering;
+    time_rendering.start();
     // display 3D image
-    drawVolume();
+    drawVolume(); // drawing 3D volume;
+    int renderingtime = time_rendering.elapsed();
+    std::cout << "rendering time consumes : " << renderingtime << " ms" << std::endl;
+
 
     // status bar information
     Information();

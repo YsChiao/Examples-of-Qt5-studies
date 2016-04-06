@@ -6,14 +6,18 @@ EMviewer::EMviewer(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::EMviewer)
 {
+
     ui->setupUi(this);
 
     // create object for the label within statusbar
     statusLabel = new QLabel(this);
     ui->statusBar->addWidget(statusLabel);
 
+
+
     // create tool window
     toolsWidget = new glOperator(this);
+
 
 
     // connection
