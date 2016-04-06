@@ -4,9 +4,9 @@
 #include "resource.h"
 #include <QApplication>
 
-Resource *Resource::resource = nullptr;
-Scores *Scores::Score = nullptr;
-Health *Health::Healths = nullptr;
+Resource *Resource::resource = NULL;
+Scores *Scores::Score = NULL;
+Health *Health::Healths = NULL;
 
 int main(int argc, char *argv[])
 {
