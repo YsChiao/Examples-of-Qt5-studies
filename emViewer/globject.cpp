@@ -77,6 +77,14 @@ void glObject::readFile(const QString& fileName)
 
 }
 
+void glObject::FileDataMaxMin()
+{
+    // sent max and min value to QDialog "tools"
+    float min = *std::min_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
+    float max = *std::max_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
+    emit sendMaxMin(max, min);
+}
+
 void glObject::getLevel(int value)
 {
     // as same as magnifier in class glOperator
@@ -231,72 +239,57 @@ void glObject::FileDataToVtkImageData()
     // read file data as unsigned char from the original data format
     imageData->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
 
-    // sent max and min value to QDialog "tools"
-    float min = *std::min_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
-    float max = *std::max_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
-    emit sendMaxMin(max, min);
+    //    //==========================================================================================
+    //    // normalize the data from -3sigma to 3sigma
+    //    min = 0;
+    //    float sum = 0;
+    //    for(int i = 0; i < fileDataFloat.length(); i++)
+    //    {
+    //        sum += fileDataFloat[i];
+    //    }
+
+    //    float mean = 0;
+    //    float sigma = 0;
+    //    mean = sum / length;
+    //    for(int i = 0; i < length; i++)
+    //    {
+    //        sigma += ((fileDataFloat[i] - mean) * (fileDataFloat[i] - mean));
+    //    }
+    //    sigma = std::sqrt(sigma/length);
 
 
-    // remove noise as the value less than 2 in the draw data
-    int length = fileDataFloat.length();
-    for(int i = 0; i < length; i++)
+    //    //  normalize and smooth
+    //    for(int i = 0; i < length; i++)
+    //    {
+    //        fileDataFloat[i] = ((fileDataFloat[i] - min) / (max - min));
+    //        if (fileDataFloat[i] > (3*sigma + mean))
+    //        {
+    //            fileDataFloat[i] = 1;
+    //        }
+    //        else if (fileDataFloat[i] < (-3*sigma + mean))
+    //        {
+    //            fileDataFloat[i] = 0;
+    //        }
+    //    }
+    //    //================================================================================
+
+    const int numComponents = imageData->GetNumberOfScalarComponents();
+    const int numElements = xLength*yLength*zLength*numComponents;
+    unsigned char* pixel = static_cast<unsigned char*>(imageData->GetScalarPointer());
+    for (int i = 0; i < numElements; i++)
     {
-        if(fileDataFloat[i] < levelValue)
+        // filter  data with level
+        if (fileDataFloat[i] < levelValue)
         {
-            fileDataFloat[i] = 0;
+            pixel[i] = 0;
         }
-    }
-
-    //==========================================================================================
-    // normalize the data from -3sigma to 3sigma
-    min = 0;
-    float sum = 0;
-    for(int i = 0; i < fileDataFloat.length(); i++)
-    {
-        sum += fileDataFloat[i];
-    }
-
-    float mean = 0;
-    float sigma = 0;
-    mean = sum / length;
-    for(int i = 0; i < length; i++)
-    {
-        sigma += ((fileDataFloat[i] - mean) * (fileDataFloat[i] - mean));
-    }
-    sigma = std::sqrt(sigma/length);
-
-
-    //  normalize and smooth
-    for(int i = 0; i < length; i++)
-    {
-        fileDataFloat[i] = ((fileDataFloat[i] - min) / (max - min));
-        if (fileDataFloat[i] > (3*sigma + mean))
+        else
         {
-            fileDataFloat[i] = 1;
-        }
-        else if (fileDataFloat[i] < (-3*sigma + mean))
-        {
-            fileDataFloat[i] = 0;
-        }
-    }
-    //================================================================================
-
-    // fill every entry of the image with data
-    int temp = 0;
-    for(int z = 0; z < zLength; z++)
-    {
-        for(int y = 0; y < yLength; y++)
-        {
-            for(int x=0; x < xLength; x++)
-            {
-                unsigned char* pixel = static_cast<unsigned char*>(imageData->GetScalarPointer(x, y, z));
-                // cast to 0 to 255
-                pixel[0] = fileDataFloat[temp] * 255;
-                temp++;
-            }
+            pixel[i] = fileDataFloat[i] * 255;
         }
     }
     imageData->Modified();
+
 }
 
 
@@ -382,10 +375,12 @@ void glObject::VolumeProcessing()
     // compute time consume
     QTime time_read;
     time_read.start();
+    // get max min float data
+    FileDataMaxMin();
     // convert float volume data to vtkImageData
     FileDataToVtkImageData(); // loading data;
     int readtime = time_read.elapsed();
-    std::cout << "read file time consumes : " << readtime << " ms" << std::endl;
+    std::cout << "read and compute time : " << readtime << " ms" << std::endl;
 
     // compute time consume
     QTime time_rendering;
@@ -393,7 +388,7 @@ void glObject::VolumeProcessing()
     // display 3D image
     drawVolume(); // drawing 3D volume;
     int renderingtime = time_rendering.elapsed();
-    std::cout << "rendering time consumes : " << renderingtime << " ms" << std::endl;
+    std::cout << "rendering : " << renderingtime << " ms" << std::endl;
 
 
     // status bar information

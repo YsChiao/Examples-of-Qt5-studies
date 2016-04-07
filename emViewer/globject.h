@@ -58,6 +58,7 @@ private:
 
     void readFile(const QString& fileName);
 
+    void FileDataMaxMin();
     void FileDataToVtkImageData();
     //void FileDataToSliceVtkImageData(int&, vtkImageData*);
 
