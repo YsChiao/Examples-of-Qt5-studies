@@ -34,7 +34,7 @@ Object::Object(QWidget* parent)
     camera = vtkSmartPointer<vtkCamera>::New();
     transform = vtkSmartPointer<vtkTransform>::New();
 
-    originPositin();
+    //originPositin();
 }
 
 Object::~Object()
@@ -338,11 +338,11 @@ void Object::drawVolume()
     volume->SetProperty(volumeProperty);
 
     // VTK Renderer
-    renderer->ResetCamera();
     renderer->AddVolume(volume);
 
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);
+    GetRenderWindow()->Render();
 
 //    // VTK Interactor
 //    interactor->SetRenderWindow(this->GetRenderWindow());
@@ -406,7 +406,7 @@ void Object::VolumeProcessing()
     drawVolume(); // drawing 3D volume;
     int renderingtime = time_rendering.elapsed();
     std::cout << "rendering : " << renderingtime << " ms" << std::endl;
-    getRotation();
+    //getRotation();
 }
 
 void Object::Information()
