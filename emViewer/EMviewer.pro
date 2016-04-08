@@ -15,17 +15,17 @@ CONFIG += c++11
 
 SOURCES += main.cpp\
         emviewer.cpp \
-    globject.cpp \
     emfile.cpp \
-    gloperator.cpp
+    tools.cpp \
+    object.cpp
 
 HEADERS  += emviewer.h \
-    globject.h \
     emfile.h \
-    gloperator.h
+    tools.h \
+    object.h
 
 FORMS    += emviewer.ui \
-    gloperator.ui
+    tools.ui
 
 RESOURCES += \
     resource.qrc
