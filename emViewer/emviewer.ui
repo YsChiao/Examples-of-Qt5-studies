@@ -29,14 +29,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="glObject" name="globject" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-     </widget>
+     <widget class="Object" name="object" native="true"/>
     </item>
    </layout>
   </widget>
@@ -86,9 +79,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>glObject</class>
+   <class>Object</class>
    <extends>QWidget</extends>
-   <header>globject.h</header>
+   <header location="global">object.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

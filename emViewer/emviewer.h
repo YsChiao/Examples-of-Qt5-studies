@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
-#include "gloperator.h"
+#include "tools.h"
 
 namespace Ui {
 class EMviewer;
@@ -18,13 +18,12 @@ public:
     ~EMviewer();
 
 public slots:
-    void showMessage(QString &Message);
-    void toolsWindowShow();
+    void show_Message_toolWidget(QString &Message);
 
 private:
     Ui::EMviewer *ui;
     QLabel *statusLabel;
-    glOperator *toolsWidget;
+    Tools *toolsWidget;
 };
 
 #endif // EMVIEWER_H
