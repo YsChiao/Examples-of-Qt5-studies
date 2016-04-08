@@ -52,6 +52,10 @@ void EMviewer::show_Message_toolWidget(QString &Message)
     toolsWidget->setGeometry(toolsWindow);
     toolsWidget->getUi()->slider->setSliderPosition(0);
     toolsWidget->show();
+    if (!toolsWidget->isTopLevel())
+    {
+        std::cout << "not top level" << std::endl;
+    }
 }
 
 

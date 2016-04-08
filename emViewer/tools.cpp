@@ -21,7 +21,6 @@ Tools::Tools(QWidget *parent) :
 
     QObject::connect(ui->slider, SIGNAL(valueChanged(int)), this, SLOT(getLevelValue(int)));
     QObject::connect(ui->slider, SIGNAL(valueChanged(int)), this, SLOT(setLevelValue(int)));
-
 }
 
 Tools::~Tools()
