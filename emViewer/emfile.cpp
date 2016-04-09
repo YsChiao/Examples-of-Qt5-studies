@@ -10,7 +10,7 @@ EmFile::EmFile()
 
 EmFile::EmFile(const char *infile)
 {
-    FILE* input = 0;
+    FILE* input = NULL;
     long size;
 
     if((input = fopen(infile, "rb")) == 0)
@@ -32,7 +32,6 @@ EmFile::EmFile(const char *infile)
     switch(type[0])
     {
     case 1:
-        // std::cout <<"type : unsigned char "<< std::endl;
         unsigned char* bytedata;
         if (!(bytedata = new unsigned char[size]))
         {
@@ -48,7 +47,6 @@ EmFile::EmFile(const char *infile)
         break;
 
     case 2:
-        // std::cout <<"type : int "<< std::endl;
         int* intdata;
         if (!(intdata = new int[size*2]))
         {
@@ -64,7 +62,6 @@ EmFile::EmFile(const char *infile)
         break;
 
     case 5:
-        // std::cout <<"type : float "<< std::endl;
         float* floatdata;
         if (!(floatdata= new float[size*4]))
         {
@@ -78,6 +75,9 @@ EmFile::EmFile(const char *infile)
         }
         delete [] floatdata;
         break;
+
+    default:
+        std::cout<< "file data type dosn't support, error!" << std::endl;
     }
 
     fclose (input);

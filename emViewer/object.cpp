@@ -102,8 +102,21 @@ void Object::readFile(const QString& fileName)
 void Object::FileDataMaxMin(float& max, float& min)
 {
     // sent max and min value to QDialog "tools"
-    min = *std::min_element(floatData.begin(), floatData.end());
-    max = *std::max_element(floatData.begin(), floatData.end());
+    if (fileType == 1)
+    {
+        min = static_cast<float>(*std::min_element(byteData.begin(), byteData.end()));
+        max = static_cast<float>(*std::max_element(byteData.begin(), byteData.end()));
+    }
+    else if (fileType == 2)
+    {
+        min = static_cast<float>(*std::min_element(intData.begin(), intData.end()));
+        max = static_cast<float>(*std::max_element(intData.begin(), intData.end()));
+    }
+    else if (fileType == 5)
+    {
+        min = *std::min_element(floatData.begin(), floatData.end());
+        max = *std::max_element(floatData.begin(), floatData.end());
+    }
     emit sendMaxMin(max, min);
 }
 
@@ -172,14 +185,42 @@ void Object::FileDataToVtkImageData()
     unsigned char* pixel = static_cast<unsigned char*>(imageData->GetScalarPointer());
     for (int i = 0; i < numElements; i++)
     {
-        // filter  data with level, smoothness
-        if (floatData.at(i) < levelValue)
+        if (fileType == 1)
         {
-            pixel[i] = 0;
+            // filter  data with level, smoothness
+            if (byteData.at(i) < levelValue)
+            {
+                pixel[i] = 0;
+            }
+            else
+            {
+                pixel[i] = byteData.at(i) * 255;
+            }
+
         }
-        else
+        else if (fileType == 2)
         {
-            pixel[i] = floatData.at(i) * 255;
+            // filter  data with level, smoothness
+            if (intData.at(i) < levelValue)
+            {
+                pixel[i] = 0;
+            }
+            else
+            {
+                pixel[i] = intData.at(i) * 255;
+            }
+        }
+        else if (fileType == 5)
+        {
+            // filter  data with level, smoothness
+            if (floatData.at(i) < levelValue)
+            {
+                pixel[i] = 0;
+            }
+            else
+            {
+                pixel[i] = floatData.at(i) * 255;
+            }
         }
     }
     imageData->Modified();
