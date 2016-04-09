@@ -39,7 +39,6 @@ Object::Object(QWidget* parent)
 
 Object::~Object()
 {
-    std::cout << "VTK delete" << std::endl;
 }
 
 void Object::open()
@@ -63,10 +62,17 @@ void Object::open()
         }
         else
         {
-            // first value of level set
             readFile(fileName);
             Information();
-            Processing();
+
+            // check the time
+            QTime processing_time_first;
+            processing_time_first.start();
+
+            dataLoading();
+
+            int time = processing_time_first.elapsed();
+            std::cout << "First time of data visulization : " << time << " ms" << std::endl;
         }
     }
     else
@@ -79,22 +85,25 @@ void Object::open()
 
 void Object::readFile(const QString& fileName)
 {
-    // read image path
+    // read new file data at first time
     const char* infile = fileName.toStdString().c_str();
+    emFile = EmFile(infile);
 
     // default value of level
     levelValue = 0;
 
-    // create em image object
-    EmFile inemdata(infile);
-    emFile = inemdata;
+    // get size
+    emFile.Dims(dims);
+
+    // get type
+    emFile.Type(fileType);
 }
 
 void Object::FileDataMaxMin(float& max, float& min)
 {
     // sent max and min value to QDialog "tools"
-    min = *std::min_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
-    max = *std::max_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
+    min = *std::min_element(floatData.begin(), floatData.end());
+    max = *std::max_element(floatData.begin(), floatData.end());
     emit sendMaxMin(max, min);
 }
 
@@ -102,48 +111,37 @@ void Object::getLevel(int value)
 {
     // as same as magnifier in class glOperator
     levelValue = static_cast<float>(value)/10 ;
-    Processing();
+
+    // load new filtered data and show new result
+    // check the time
+    QTime processing_time;
+    processing_time.start();
+
+    dataLoading();
+
+    int time = processing_time.elapsed();
+    std::cout << "Total time of data visulization : " << time << " ms" << std::endl;
 }
 
-void Object::Processing()
+void Object::dataLoading()
 {
-    // get type
-    unsigned char fileType;
-    emFile.Type(fileType);
-
-    // load image data
+    // load a copy of data, and manipulate the copy data later
     switch(fileType)
     {
     case 1:
     {
-        std::vector<unsigned char> fileByte;
-        emFile.ByteData(fileByte);
-        // copy data form std to qvector
-        QVector<unsigned char> temp = QVector<unsigned char>::fromStdVector(fileByte);
-        fileDataByte = temp;
+        emFile.ByteData(byteData);
     }
     case 2:
     {
-        std::vector<int> fileInt;
-        emFile.IntData(fileInt);
-        // copy data form std to qvector
-        QVector<int> temp = QVector<int>::fromStdVector(fileInt);
-        fileDataInt = temp;
+        emFile.IntData(intData);
     }
     case 5:
     {
-        std::vector<float> fileFloat;
-        emFile.FloatData(fileFloat);
-        // copy data form std to qvector
-        QVector<float> temp = QVector<float>::fromStdVector(fileFloat);
-        fileDataFloat = temp;
+        emFile.FloatData(floatData);
     }
     }
 
-    // get size
-    emFile.Dims(dims);
-
-    //SliceProcessing();
     VolumeProcessing();
 }
 
@@ -156,84 +154,6 @@ QSize Object::sizeHint() const
 {
     return QSize(400,400);
 }
-
-//void glObject::FileDataToSliceVtkImageData(int& zAix, vtkImageData* imageData)
-//{
-//    // get size of origin data
-//    int xLength = dims[0];
-//    int yLength = dims[1];
-//    int length = fileDataFloat.length();
-//    int offset  = xLength*yLength*zAix;
-
-//    // Specify the size of the image data
-//    imageData->SetDimensions(xLength, yLength, 1);
-
-//    // read file data as unsigned char from the original data format
-//    imageData->AllocateScalars(VTK_FLOAT, 1);
-
-//    // remove noise as the value less than the threshold in the draw data
-//    // as within the draw data, there are so many noise inside
-//    for(int i = 0; i < length; i++)
-//    {
-//        if(fileDataFloat[i] < 2)
-//        {
-//            fileDataFloat[i] = 0;
-//        }
-//    }
-
-//    // as the data between 0 to 1
-//    //==========================================================================================
-//    // normalize the data from -3sigma to 3sigma
-//    float min = *std::min_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
-//    float max = *std::max_element(fileDataFloat.constBegin(),fileDataFloat.constEnd());
-
-//    float sum = 0;
-//    for(int i = 0; i < fileDataFloat.length(); i++)
-//    {
-//        sum += fileDataFloat[i];
-//    }
-
-//    float mean = 0;
-//    float sigma = 0;
-//    mean = sum / length;
-//    for(int i = 0; i < length; i++)
-//    {
-//        sigma += ((fileDataFloat[i] - mean) * (fileDataFloat[i] - mean));
-//    }
-//    sigma = std::sqrt(sigma/length);
-
-//    for(int i = 0; i < length; i++)
-//    {
-//        fileDataFloat[i] = ((fileDataFloat[i] - min) / (max - min));
-//    }
-
-//    // smooth
-//    for(int i = 0; i < length; i++)
-//    {
-//        if(fileDataFloat[i] > (3*sigma + mean))
-//        {
-//            fileDataFloat[i] = 1;
-//        }
-//        if(fileDataFloat[i] < (-3*sigma + mean))
-//        {
-//            fileDataFloat[i] = 0;
-//        }
-//    }
-//    //================================================================================
-//    // as convert the data format from original to unsigned char
-//    // fill every entry of the image with data
-//    int temp = 0;
-//    for(int y = 0; y < yLength; y++)
-//    {
-//        for(int x=0; x < xLength; x++)
-//        {
-//            float* pixel = static_cast<float*>(imageData->GetScalarPointer(x, y, 0));
-//            pixel[0] = fileDataFloat[temp+offset];
-//            temp++;
-//        }
-//    }
-//    imageData->Modified();
-//}
 
 
 void Object::FileDataToVtkImageData()
@@ -252,18 +172,17 @@ void Object::FileDataToVtkImageData()
     unsigned char* pixel = static_cast<unsigned char*>(imageData->GetScalarPointer());
     for (int i = 0; i < numElements; i++)
     {
-        // filter  data with level
-        if (fileDataFloat[i] < levelValue)
+        // filter  data with level, smoothness
+        if (floatData.at(i) < levelValue)
         {
             pixel[i] = 0;
         }
         else
         {
-            pixel[i] = fileDataFloat[i] * 255;
+            pixel[i] = floatData.at(i) * 255;
         }
     }
     imageData->Modified();
-
 }
 
 void Object::originPositin()
@@ -277,9 +196,6 @@ void Object::originPositin()
 
     vtkMatrix4x4 *matrix = camera->GetModelTransformMatrix();
     std::cout << *matrix << std::endl;
-
-    //    volume->GetOrientation(orentation);
-    //    std::cout << orentation[0] << " " << orentation[1] << " " << orentation[2] << std::endl;
 
 }
 
@@ -343,80 +259,28 @@ void Object::drawVolume()
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);
     GetRenderWindow()->Render();
-
-//    // VTK Interactor
-//    interactor->SetRenderWindow(this->GetRenderWindow());
-//    interactor->SetInteractorStyle(style);  //like paraview
-//    // Begin mouse interaction
-//    interactor->CreateRepeatingTimer(1);
-//    interactor->Start();
 }
-
-//void glObject::drawSlice(vtkImageData* imageData)
-//{
-//    vtkSmartPointer<vtkDataSetMapper> imageMapper = vtkSmartPointer<vtkDataSetMapper>::New();
-//    imageMapper->SetInputData(imageData);
-
-//    vtkSmartPointer<vtkActor> imageActor = vtkSmartPointer<vtkActor>::New();
-//    imageActor->SetMapper(imageMapper);
-
-//    // VTK Render
-//    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-//    renderer->AddActor(imageActor);
-
-//    // VTK/Qtwidget
-//    GetRenderWindow()->AddRenderer(renderer);
-//}
-
-//void glObject::SliceProcessing()
-//{
-//    vtkImageData *fileDataSliceVtkImageData = vtkImageData::New();
-
-//    // get middle slice
-//    int zAix  = (int)(dims[2]/2);
-//    // convert float volume data to vtkImageData
-//    FileDataToSliceVtkImageData(zAix, fileDataSliceVtkImageData);
-
-//    // display 2D volumn
-//    drawSlice(fileDataSliceVtkImageData);
-
-//    // status bar information
-//    Information();
-//}
 
 void Object::VolumeProcessing()
 {
-    // compute time consume
-    QTime time_read;
-    time_read.start();
-
     // get max min float data
     float max = 0;
     float min = 0;
     FileDataMaxMin(max, min);
-    // convert float volume data to vtkImageData
-    FileDataToVtkImageData(); // loading data;
-    int readtime = time_read.elapsed();
-    std::cout << "read and compute time : " << readtime << " ms" << std::endl;
 
-    // compute time consume
-    QTime time_rendering;
-    time_rendering.start();
+    // convert float volume data to vtkImageData
+    FileDataToVtkImageData();
+
     // display 3D image
-    drawVolume(); // drawing 3D volume;
-    int renderingtime = time_rendering.elapsed();
-    std::cout << "rendering : " << renderingtime << " ms" << std::endl;
-    //getRotation();
+    drawVolume();
 }
 
 void Object::Information()
 {
-    // get size information
-    int DIM[3];
-    emFile.Dims(DIM);
-    QString sQStringx = QString::number(DIM[0]);
-    QString sQStringy = QString::number(DIM[1]);
-    QString sQStringz = QString::number(DIM[2]);
+    // show size informatio within status bar
+    QString sQStringx = QString::number(dims[0]);
+    QString sQStringy = QString::number(dims[1]);
+    QString sQStringz = QString::number(dims[2]);
     QString Message = QString("[" +sQStringx +"," +sQStringy +"," +sQStringz +"]" );
     emit sendMessage(Message);
 }

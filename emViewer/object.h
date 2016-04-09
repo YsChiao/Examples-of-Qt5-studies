@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <vector>
+#include <algorithm>
 #include <vtkAutoInit.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL)
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL)
@@ -57,33 +58,49 @@ protected:
 
 private:
 
+    // read data from file
     void readFile(const QString& fileName);
 
-    void FileDataMaxMin(float& max, float& min);
-    void FileDataToVtkImageData();
-    //void FileDataToSliceVtkImageData(int&, vtkImageData*);
+    // get data size
+    void Information();
 
+    // get the copy of data for manipulating
+    void dataLoading();
+
+    // get the max and min data
+    void FileDataMaxMin(float& max, float& min);
+
+    // covert data from vector to VtkImageData format
+    void FileDataToVtkImageData();
+
+    // rendering and display
+    void drawVolume();
+
+    // data flow : FileDataMaxMin, FileDataToVtkImageData, drawVolume
+    void VolumeProcessing();
+
+    // get and set camera parameters
     void originPositin();
     void getRotation();
 
-
-    void drawVolume();
-    //void drawSlice(vtkImageData*);
-
-    void Processing();
-    void VolumeProcessing();
-    //void SliceProcessing();
-    void Information();
-
-
+    // original data
     EmFile emFile;
-    QVector<unsigned char> fileDataByte;
-    QVector<float> fileDataFloat;
-    QVector<int> fileDataInt;
+
+    // copy data
+    std::vector<unsigned char> byteData;
+    std::vector<int> intData;
+    std::vector<float> floatData;
+
+    // copy data dimentions
     int dims[3];
+
+    // coppy data type
+    unsigned char fileType;
+
+    // filter value, default 0
     float levelValue;
 
-
+    // vtk rendering class
     vtkSmartPointer<vtkImageData> imageData;
     vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper;
     vtkSmartPointer<vtkPiecewiseFunction> opacityTransferFunction;
@@ -93,14 +110,14 @@ private:
     vtkSmartPointer<vtkVolume> volume;
     vtkSmartPointer<vtkRenderer> renderer;
 
+
+    // for camera paratemer reset, later use
     vtkSmartPointer<vtkRenderWindowInteractor> interactor;
     vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
-
     vtkSmartPointer<vtkCamera> camera;
     vtkSmartPointer<vtkTransform> transform;
 
-
-
+    // camera parameters
     double pos[3];
     double viewUp[3];
     double focalPoint[3];
