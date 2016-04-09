@@ -41,7 +41,6 @@ void EMviewer::show_Message_toolWidget(QString &Message)
 {
     statusLabel->setText(Message);
 
-
     // toolWidget
     // obtain mainwindow position
     QRect window = this->geometry();
