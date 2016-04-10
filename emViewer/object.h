@@ -28,7 +28,12 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include <vtkVolumeProperty.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleTrackballActor.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkOutlineFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkTransform.h>
 
 #include "emfile.h"
 #include "tools.h"
@@ -110,20 +115,23 @@ private:
     vtkSmartPointer<vtkVolume> volume;
     vtkSmartPointer<vtkRenderer> renderer;
 
+    // vtk outline class
+    vtkSmartPointer<vtkOutlineFilter> outline;
+    vtkSmartPointer<vtkPolyDataMapper> outlineMapper;
+    vtkSmartPointer<vtkActor> outlineActor;
+
 
     // for camera paratemer reset, later use
     vtkSmartPointer<vtkRenderWindowInteractor> interactor;
-    vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
+    vtkSmartPointer<vtkInteractorStyleTrackballCamera> style_camera;
+    vtkSmartPointer<vtkInteractorStyleTrackballActor> style_actor;
     vtkSmartPointer<vtkCamera> camera;
     vtkSmartPointer<vtkTransform> transform;
 
-    // camera parameters
-    double pos[3];
-    double viewUp[3];
-    double focalPoint[3];
-    double orentation[3];
-    vtkMatrix4x4 * 	transpose;
-
+    // volume center and orientation
+    double *origin;
+    double *center;
+    double *wxyz;
 };
 
 #endif

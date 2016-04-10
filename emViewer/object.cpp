@@ -7,12 +7,6 @@
 #include <QVector>
 #include <QTime>
 
-#include <vtkTransform.h>
-#include <vtkMatrix4x4.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-
-
-
 
 #include "object.h"
 
@@ -28,13 +22,18 @@ Object::Object(QWidget* parent)
     volume = vtkSmartPointer<vtkVolume>::New();
     renderer = vtkSmartPointer<vtkRenderer>::New();
 
+    outline = vtkSmartPointer<vtkOutlineFilter>::New();
+    outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    outlineActor = vtkSmartPointer<vtkActor>::New();
+
     interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+    style_camera = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+    style_actor = vtkSmartPointer<vtkInteractorStyleTrackballActor>::New();
 
     camera = vtkSmartPointer<vtkCamera>::New();
     transform = vtkSmartPointer<vtkTransform>::New();
 
-    //originPositin();
+    originPositin();
 }
 
 Object::~Object()
@@ -72,7 +71,7 @@ void Object::open()
             dataLoading();
 
             int time = processing_time_first.elapsed();
-            std::cout << "First time of data visulization : " << time << " ms" << std::endl;
+            std::cout << "First time of data visulization : " << time << " ms" << std::endl << std::endl;
         }
     }
     else
@@ -80,6 +79,28 @@ void Object::open()
         QMessageBox::information(this, tr("EM Viewer"), tr("No File!!!"));
         return ;
     }
+}
+
+void Object::originPositin()
+{
+    std::cout << "original volume origin, center, orientationWXZY : " << std::endl;
+    origin = volume->GetOrigin();
+    std::cout << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
+    center = volume->GetCenter();
+    std::cout << center[0] << " " << center[1] << " " << center[2] << std::endl;
+    wxyz = volume->GetOrientationWXYZ();
+    std::cout << wxyz[0] << " " << wxyz[1] << " " << wxyz[2] << " " << wxyz[3] << std::endl;
+}
+
+void Object::getRotation()
+{
+    std::cout << "current volume origin, center, orientationWXZY : " << std::endl;
+    double *origin = volume->GetOrigin();
+    std::cout << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
+    double *center = volume->GetCenter();
+    std::cout << center[0] << " " << center[1] << " " << center[2] << std::endl;
+    double *wxyz = volume->GetOrientationWXYZ();
+    std::cout << wxyz[0] << " " << wxyz[1] << " " << wxyz[2] << " " << wxyz[3] << std::endl;
 }
 
 
@@ -133,7 +154,7 @@ void Object::getLevel(int value)
     dataLoading();
 
     int time = processing_time.elapsed();
-    std::cout << "Total time of data visulization : " << time << " ms" << std::endl;
+    std::cout << "Total time of data visulization : " << time << " ms" << std::endl << std::endl;
 }
 
 void Object::dataLoading()
@@ -170,7 +191,7 @@ QSize Object::sizeHint() const
 
 
 void Object::FileDataToVtkImageData()
-{    
+{
 
     // Specify the size of the image data
     imageData->SetDimensions(dims[0], dims[1], dims[2]);
@@ -226,37 +247,6 @@ void Object::FileDataToVtkImageData()
     imageData->Modified();
 }
 
-void Object::originPositin()
-{
-    camera->GetPosition(pos);
-    std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-    camera->GetViewUp(viewUp);
-    std::cout << viewUp[0] << " " << viewUp[1] << " " << viewUp[2] << std::endl;
-    camera->GetFocalPoint(focalPoint);
-    std::cout << focalPoint[0] << " " << focalPoint[1] << " " << focalPoint[2] << std::endl;
-
-    vtkMatrix4x4 *matrix = camera->GetModelTransformMatrix();
-    std::cout << *matrix << std::endl;
-
-}
-
-void Object::getRotation()
-{
-    double current_pos[3], current_viewUp[3], current_focalPoint[3], current_orentation[3];
-    camera->GetPosition(current_pos);
-    std::cout << current_pos[0] << " " << current_pos[1] << " " << current_pos[2] << std::endl;
-    camera->GetViewUp(current_viewUp);
-    std::cout << current_viewUp[0] << " " << current_viewUp[1] << " " << current_viewUp[2] << std::endl;
-    camera->GetFocalPoint(current_focalPoint);
-    std::cout << current_focalPoint[0] << " " << current_focalPoint[1] << " " << current_focalPoint[2] << std::endl;
-    volume->GetOrientation(orentation);
-    std::cout << current_orentation[0] << " " << current_orentation[1] << " " << current_orentation[2] << std::endl;
-
-    vtkMatrix4x4 *matrix = camera->GetModelTransformMatrix();
-    std::cout << *matrix << std::endl;
-}
-
-
 void Object::drawVolume()
 {
     // disable the warning windows pop.
@@ -294,12 +284,22 @@ void Object::drawVolume()
     volume->SetMapper(volumeMapper);
     volume->SetProperty(volumeProperty);
 
+    // Create the outline
+    outline->SetInputData(imageData);
+    outlineMapper->SetInputConnection(outline->GetOutputPort());
+    outlineActor->SetMapper(outlineMapper);
+    outlineActor->GetProperty()->SetColor(1,1,1);
+
     // VTK Renderer
     renderer->AddVolume(volume);
+    renderer->AddActor(outlineActor);
 
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);
     GetRenderWindow()->Render();
+
+    GetRenderWindow()->GetInteractor()->SetInteractorStyle(style_actor);
+    GetRenderWindow()->GetInteractor()->Start();
 }
 
 void Object::VolumeProcessing()
@@ -314,6 +314,9 @@ void Object::VolumeProcessing()
 
     // display 3D image
     drawVolume();
+
+    // get camera parameters
+    getRotation();
 }
 
 void Object::Information()
