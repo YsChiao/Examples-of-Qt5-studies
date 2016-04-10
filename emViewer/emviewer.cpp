@@ -7,7 +7,6 @@ EMviewer::EMviewer(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::EMviewer)
 {
-
     ui->setupUi(this);
 
     // create object for the label within statusbar
