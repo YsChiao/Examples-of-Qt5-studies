@@ -11,27 +11,20 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL)
 VTK_MODULE_INIT(vtkInteractionStyle)
 
 #include <vtkSmartPointer.h>
-#include <vtkImageActor.h>
 #include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
 #include <vtkImageData.h>
-#include <vtkImageMapper.h>
-#include <vtkImageProperty.h>
-#include <vtkImageLuminance.h>
-#include <vtkImageIdealHighPass.h>
+#include <vtkImageActor.h>
 #include <vtkDataSetMapper.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
 #include <vtkVolume.h>
 #include <vtkVolumeProperty.h>
 #include <vtkSmartVolumeMapper.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballActor.h>
-#include <vtkOutlineFilter.h>
-#include <vtkTextProperty.h>
-#include <vtkCubeAxesActor.h>
+#include <vtkOutlineSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 
@@ -115,13 +108,9 @@ private:
     vtkSmartPointer<vtkRenderer> renderer;
 
     // vtk outline class
-    vtkSmartPointer<vtkOutlineFilter> outline;
+    vtkSmartPointer<vtkOutlineSource> outlineSource;
     vtkSmartPointer<vtkPolyDataMapper> outlineMapper;
     vtkSmartPointer<vtkActor> outlineActor;
-
-    // vtk Cube Axes
-//    vtkSmartPointer<vtkCubeAxesActor> cubeAxesActor;
-
 
     // set interactor style, actor mode
     vtkSmartPointer<vtkInteractorStyleTrackballActor> style_actor;

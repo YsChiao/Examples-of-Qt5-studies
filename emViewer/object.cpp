@@ -22,11 +22,9 @@ Object::Object(QWidget* parent)
     volume = vtkSmartPointer<vtkVolume>::New();
     renderer = vtkSmartPointer<vtkRenderer>::New();
 
-    outline = vtkSmartPointer<vtkOutlineFilter>::New();
+    outlineSource = vtkSmartPointer<vtkOutlineSource>::New();
     outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     outlineActor = vtkSmartPointer<vtkActor>::New();
-
-//    cubeAxesActor = vtkSmartPointer<vtkCubeAxesActor>::New();
 
     style_actor = vtkSmartPointer<vtkInteractorStyleTrackballActor>::New();
 }
@@ -312,20 +310,18 @@ void Object::drawVolume()
     volume->SetMapper(volumeMapper);
     volume->SetProperty(volumeProperty);
 
-//    // Create the outline
-//    outline->SetInputData(imageData);
-//    outlineMapper->SetInputConnection(outline->GetOutputPort());
-//    outlineActor->SetMapper(outlineMapper);
-//    outlineActor->GetProperty()->SetLineStipplePattern(0xf0f0); //dotted line
-//    outlineActor->GetProperty()->SetColor(0,1,0); // with green color
+    // draw the outline, bounds
+    outlineSource->SetBounds(imageData->GetBounds());
+    outlineMapper->SetInputConnection(outlineSource->GetOutputPort());
+    outlineActor->SetMapper(outlineMapper);
+    outlineActor->GetProperty()->SetLineStipplePattern(0xf0f0); //dotted line
+    outlineActor->GetProperty()->SetColor(0,1,0); // with green color
 
-    // Create the bouding
-//    cubeAxesActor->SetBounds(0, dims[0], 0, dims[1], 0, dims[2]);
+
 
     // VTK Renderer
     renderer->AddVolume(volume);
-//    renderer->AddActor(cubeAxesActor);
-//    renderer->AddActor(outlineActor);
+    renderer->AddActor(outlineActor);
 
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);
