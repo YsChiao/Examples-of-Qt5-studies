@@ -25,11 +25,15 @@ level = 1.6
 ![Alt Text](images/result_3.png)
 
 
-2016/04/12
-
-fix the bugs :
-
+2016/04/12, fix the bugs :
+ 
 1. visulize each object in the center of scene, at every open time.
 
 2. draw the bounds of the object with dotted line and color green. 
+
+
+level = 1.7
+![Alt Text](images/20160412.png)
+
+
 
