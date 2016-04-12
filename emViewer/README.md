@@ -24,3 +24,8 @@ level = 1.6
 
 ![Alt Text](images/result_3.png)
 
+
+2016/04/12
+fix the bug of visulization position of actor, for each new object, 
+center the object in the middle of QVTKWIDGET scene.
+
