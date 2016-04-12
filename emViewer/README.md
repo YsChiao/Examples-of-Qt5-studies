@@ -4,25 +4,25 @@
 
 ~~![Alt Text](images/layout.png)~~
 
-2.reresult of 3d visulization, testvol.em  
+~~2.reresult of 3d visulization, testvol.em ~~
 
-![Alt Text](images/result.png)
+~~![Alt Text](images/result.png)~~
 
-3.add tools to set threadhold and show different visulization result.
+~~3.add tools to set threadhold and show different visulization result.~~
 
-for example:
+~~for example:~~
 
-levle = -0.4
+~~levle = -0.4~~
 
-![Alt Text](images/result_1.png)
+~~![Alt Text](images/result_1.png)~~
 
-level = 0.0
+~~level = 0.0~~
 
-![Alt Text](images/result_2.png)
+~~![Alt Text](images/result_2.png)~~
 
-level = 1.6
+~~level = 1.6~~
 
-![Alt Text](images/result_3.png)
+~~![Alt Text](images/result_3.png)~~
 
 
 2016/04/12, fix the bugs :
