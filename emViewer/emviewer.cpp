@@ -46,7 +46,7 @@ void EMviewer::show_Message_toolWidget(QString &Message)
     // set the position of tools widget
     int height = toolsWidget->height();
     int width = toolsWidget->width();
-    QRect toolsWindow(window.x()+window.width()+10, window.y()+height, width, height);
+    QRect toolsWindow(window.x()+window.width()/2+10, window.y()/2+height, width, height);
     toolsWidget->setGeometry(toolsWindow);
     toolsWidget->getUi()->slider->setSliderPosition(0);
     toolsWidget->show();
