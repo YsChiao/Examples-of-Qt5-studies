@@ -29,11 +29,11 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include <vtkSmartVolumeMapper.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballActor.h>
-#include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkOutlineFilter.h>
+#include <vtkTextProperty.h>
+#include <vtkCubeAxesActor.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
-#include <vtkTransform.h>
 
 #include "emfile.h"
 #include "tools.h"
@@ -84,9 +84,8 @@ private:
     // data flow : FileDataMaxMin, FileDataToVtkImageData, drawVolume
     void VolumeProcessing();
 
-    // get and set camera parameters
-    void originPositin();
-    void getRotation();
+    // get volume origin, position, center, orientation, scale information
+    void getVolumeInformation();
 
     // original data
     EmFile emFile;
@@ -120,18 +119,12 @@ private:
     vtkSmartPointer<vtkPolyDataMapper> outlineMapper;
     vtkSmartPointer<vtkActor> outlineActor;
 
+    // vtk Cube Axes
+//    vtkSmartPointer<vtkCubeAxesActor> cubeAxesActor;
 
-    // for camera paratemer reset, later use
-    vtkSmartPointer<vtkRenderWindowInteractor> interactor;
-    vtkSmartPointer<vtkInteractorStyleTrackballCamera> style_camera;
+
+    // set interactor style, actor mode
     vtkSmartPointer<vtkInteractorStyleTrackballActor> style_actor;
-    vtkSmartPointer<vtkCamera> camera;
-    vtkSmartPointer<vtkTransform> transform;
-
-    // volume center and orientation
-    double *origin;
-    double *center;
-    double *wxyz;
 };
 
 #endif
