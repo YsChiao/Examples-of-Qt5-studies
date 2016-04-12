@@ -4,7 +4,7 @@
 
 ~~![Alt Text](images/layout.png)~~
 
-~~2.reresult of 3d visulization, testvol.em ~~
+~~2.reresult of 3d visulization, testvol.em~~
 
 ~~![Alt Text](images/result.png)~~
 
