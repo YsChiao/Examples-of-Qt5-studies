@@ -2,11 +2,7 @@
 
 ~~1.display 2d slice of 3D object. example:~~  
 
-~~![Alt Text](images/layout.png)~~
-
 ~~2.reresult of 3d visulization, testvol.em~~
-
-~~![Alt Text](images/result.png)~~
 
 ~~3.add tools to set threadhold and show different visulization result.~~
 
@@ -14,16 +10,9 @@
 
 ~~levle = -0.4~~
 
-~~![Alt Text](images/result_1.png)~~
-
 ~~level = 0.0~~
 
-~~![Alt Text](images/result_2.png)~~
-
 ~~level = 1.6~~
-
-~~![Alt Text](images/result_3.png)~~
-
 
 2016/04/12, fix the bugs :
  
@@ -31,9 +20,24 @@
 
 2. draw the bounds of the object with dotted line and color green. 
 
+level = 1.7, with bouding box
 
-level = 1.7
 ![Alt Text](images/20160412.png)
+
+2016/04/13, fix the bugs :
+
+1. add axes and fix the expanding bug at program start.
+
+start, expand with window size
+
+![Alt Text](images/open.png)
+
+level = 1.7, with axes
+
+![Alt Text](images/20160413.png)
+
+
+
 
 
 
