@@ -22,15 +22,82 @@ Object::Object(QWidget* parent)
     volume = vtkSmartPointer<vtkVolume>::New();
     renderer = vtkSmartPointer<vtkRenderer>::New();
 
-    outlineSource = vtkSmartPointer<vtkOutlineSource>::New();
-    outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    outlineActor = vtkSmartPointer<vtkActor>::New();
+//    outlineSource = vtkSmartPointer<vtkOutlineSource>::New();
+//    outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//    outlineActor = vtkSmartPointer<vtkActor>::New();
+
+    pts = vtkSmartPointer<vtkPoints>::New();
+    linesPolyData = vtkSmartPointer<vtkPolyData>::New();
+    line0 = vtkSmartPointer<vtkLine>::New();
+    line1 = vtkSmartPointer<vtkLine>::New();
+    line2 = vtkSmartPointer<vtkLine>::New();
+    lines = vtkSmartPointer<vtkCellArray>::New();
+    colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+    linesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    linesActor = vtkSmartPointer<vtkActor>::New();
 
     style_actor = vtkSmartPointer<vtkInteractorStyleTrackballActor>::New();
 }
 
 Object::~Object()
 {
+}
+
+void Object::Axes(double xMax, double yMax, double zMax)
+{
+    int scale = 10;
+    // create three points
+    double origin[3] = {0.0, 0.0, 0.0};
+    double x[3] = {xMax/scale, 0.0, 0.0};
+    double y[3] = {0.0, yMax/scale, 0.0};
+    double z[3] = {0.0, 0.0, zMax/scale};
+
+    // create a vtkPoints container and store the points in it
+    pts->Reset();
+    pts->InsertNextPoint(origin);
+    pts->InsertNextPoint(x);
+    pts->InsertNextPoint(y);
+    pts->InsertNextPoint(z);
+
+    // add the points to the polydata container
+    linesPolyData->SetPoints(pts);
+
+    // create lines
+    line0->GetPointIds()->SetId(0,0);  // the second 0 is the index of the Origin in linesPolyData's points
+    line0->GetPointIds()->SetId(1,1);  // 2 is the index of x in linesPolyData's points
+
+    line1->GetPointIds()->SetId(0, 0); // the second 0 is the index of the Origin in linesPolyData's points
+    line1->GetPointIds()->SetId(1, 2); // 2 is the index of y in linesPolyData's points
+
+    line2->GetPointIds()->SetId(0, 0); // the second 0 is the index of the Origin in linesPolyData's points
+    line2->GetPointIds()->SetId(1, 3); // 3 is the index of z in linesPolyData's points
+
+    // Create a vtkCellArray container and store the lines in it
+    lines->InsertNextCell(line0);
+    lines->InsertNextCell(line1);
+    lines->InsertNextCell(line2);
+
+    // Add the lines to the polydata container
+    linesPolyData->SetLines(lines);
+
+    // Create colors - one for each line
+    unsigned char red[3] = {255, 0, 0};
+    unsigned char green[3] = {0, 255, 0};
+    unsigned char blue[3] = {0, 0, 255};
+
+    // Create a vtkUnsignedCharArray container and store the colors in it
+    colors->SetNumberOfComponents(3);
+    colors->InsertNextTupleValue(red);
+    colors->InsertNextTupleValue(green);
+    colors->InsertNextTupleValue(blue);
+    linesPolyData->GetCellData()->SetScalars(colors);
+
+    // Setup the visualization pipeline
+    linesMapper->SetInputData(linesPolyData);
+    linesActor->SetMapper(linesMapper);
+    renderer->AddActor(linesActor);
+    GetRenderWindow()->AddRenderer(renderer);
+    GetRenderWindow()->Render();
 }
 
 void Object::open()
@@ -94,22 +161,22 @@ void Object::getVolumeInformation()
     std::cout << scale[0] << " " << scale[1] << " " << scale[2] << std::endl;
 
 
-    std::cout << "current outlineActor origin, position, center, orientation, scale information : " << std::endl;
+//    std::cout << "current outlineActor origin, position, center, orientation, scale information : " << std::endl;
 
-    double *origin2 = outlineActor->GetOrigin();
-    std::cout << origin2[0] << " " << origin2[1] << " " << origin2[2] << std::endl;
+//    double *origin2 = outlineActor->GetOrigin();
+//    std::cout << origin2[0] << " " << origin2[1] << " " << origin2[2] << std::endl;
 
-    double *pos2 = outlineActor->GetPosition();
-    std::cout << pos2[0] << " " << pos2[1] << " " << pos2[2] << std::endl;
+//    double *pos2 = outlineActor->GetPosition();
+//    std::cout << pos2[0] << " " << pos2[1] << " " << pos2[2] << std::endl;
 
-    double *center2 = outlineActor->GetCenter();
-    std::cout << center2[0] << " " << center2[1] << " " << center2[2] << std::endl;
+//    double *center2 = outlineActor->GetCenter();
+//    std::cout << center2[0] << " " << center2[1] << " " << center2[2] << std::endl;
 
-    double *wxyz2 = outlineActor->GetOrientationWXYZ();
-    std::cout << wxyz2[0] << " " << wxyz2[1] << " " << wxyz2[2] << " " << wxyz2[3] << std::endl;
+//    double *wxyz2 = outlineActor->GetOrientationWXYZ();
+//    std::cout << wxyz2[0] << " " << wxyz2[1] << " " << wxyz2[2] << " " << wxyz2[3] << std::endl;
 
-    double *scale2 = outlineActor->GetScale();
-    std::cout << scale2[0] << " " << scale2[1] << " " << scale2[2] << std::endl;
+//    double *scale2 = outlineActor->GetScale();
+//    std::cout << scale2[0] << " " << scale2[1] << " " << scale2[2] << std::endl;
 }
 
 
@@ -134,11 +201,17 @@ void Object::readFile(const QString& fileName)
     volume->SetOrientation(0,0,0);
     volume->SetScale(1,1,1);
 
-    // set the outline with origin, position, orientation, scale with defualt value.
-    outlineActor->SetOrigin(0,0,0);
-    outlineActor->SetPosition(0,0,0);
-    outlineActor->SetOrientation(0,0,0);
-    outlineActor->SetScale(1,1,1);
+//    // set the outline with origin, position, orientation, scale with default value.
+//    outlineActor->SetOrigin(0,0,0);
+//    outlineActor->SetPosition(0,0,0);
+//    outlineActor->SetOrientation(0,0,0);
+//    outlineActor->SetScale(1,1,1);
+
+    // set the axes with origin, poistion, orientation, scale with default value
+    linesActor->SetOrigin(0,0,0);
+    linesActor->SetPosition(0,0,0);
+    linesActor->SetOrientation(0,0,0);
+    linesActor->SetScale(1,1,1);
 
     // reset the camera parameters with the bounding box
     renderer->ResetCamera(0,dims[0],0,dims[1],0,dims[2]);
@@ -310,18 +383,17 @@ void Object::drawVolume()
     volume->SetMapper(volumeMapper);
     volume->SetProperty(volumeProperty);
 
-    // draw the outline, bounds
-    outlineSource->SetBounds(imageData->GetBounds());
-    outlineMapper->SetInputConnection(outlineSource->GetOutputPort());
-    outlineActor->SetMapper(outlineMapper);
-    outlineActor->GetProperty()->SetLineStipplePattern(0xf0f0); //dotted line
-    outlineActor->GetProperty()->SetColor(0,1,0); // with green color
-
-
+    //    // draw the outline, bounds
+    //    outlineSource->SetBounds(imageData->GetBounds());
+    //    outlineMapper->SetInputConnection(outlineSource->GetOutputPort());
+    //    outlineActor->SetMapper(outlineMapper);
+    //    outlineActor->GetProperty()->SetLineStipplePattern(0xf0f0); //dotted line
+    //    outlineActor->GetProperty()->SetColor(0,1,0); // with green color
 
     // VTK Renderer
     renderer->AddVolume(volume);
-    renderer->AddActor(outlineActor);
+    //    renderer->AddActor(outlineActor);
+    this->Axes(dims[0], dims[1], dims[2]);
 
     // VTK/Qtwidget
     GetRenderWindow()->AddRenderer(renderer);

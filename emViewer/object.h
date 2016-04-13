@@ -25,8 +25,14 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballActor.h>
 #include <vtkOutlineSource.h>
+#include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkLine.h>
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
+#include <vtkCellData.h>
+#include <vtkUnsignedCharArray.h>
 
 #include "emfile.h"
 #include "tools.h"
@@ -40,6 +46,8 @@ class Object : public QVTKWidget
 public:
     explicit Object(QWidget* parent = 0);
     ~Object();
+
+    void Axes(double xMax = 1.0, double yMax = 1.0, double zMax = 1.0);
 
 public slots:
     void open();
@@ -107,10 +115,27 @@ private:
     vtkSmartPointer<vtkVolume> volume;
     vtkSmartPointer<vtkRenderer> renderer;
 
-    // vtk outline class
-    vtkSmartPointer<vtkOutlineSource> outlineSource;
-    vtkSmartPointer<vtkPolyDataMapper> outlineMapper;
-    vtkSmartPointer<vtkActor> outlineActor;
+//    // vtk outline class
+//    vtkSmartPointer<vtkOutlineSource> outlineSource;
+//    vtkSmartPointer<vtkPolyDataMapper> outlineMapper;
+//    vtkSmartPointer<vtkActor> outlineActor;
+
+    // create a vtkPoints container and store the points in it
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+    // add the points to the polydata container
+    vtkSmartPointer<vtkPolyData> linesPolyData = vtkSmartPointer<vtkPolyData>::New();
+    // create lines
+    vtkSmartPointer<vtkLine> line0 = vtkSmartPointer<vtkLine>::New();
+    vtkSmartPointer<vtkLine> line1 = vtkSmartPointer<vtkLine>::New();
+    vtkSmartPointer<vtkLine> line2 = vtkSmartPointer<vtkLine>::New();
+    // Create a vtkCellArray container and store the lines in it
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    // Create a vtkUnsignedCharArray container and store the colors in it
+    vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+    // Setup the visualization pipeline
+    vtkSmartPointer<vtkPolyDataMapper> linesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    vtkSmartPointer<vtkActor> linesActor = vtkSmartPointer<vtkActor>::New();
+
 
     // set interactor style, actor mode
     vtkSmartPointer<vtkInteractorStyleTrackballActor> style_actor;
