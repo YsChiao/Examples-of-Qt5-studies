@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include "object.h"
 #include "tools.h"
 
 namespace Ui {
